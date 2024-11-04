@@ -17,9 +17,8 @@ const timerInterval = ref(null);
 const timerStarted = ref(false);
 const selectedBoard = ref(boardSizes[0].value); // Use `value` here to store just rows and cols
 
-// Set the computed classes for rows and columns based on selected board
-const gridCols = computed(() => `grid-cols-${selectedBoard.value.cols}`);
-const gridRows = computed(() => `grid-rows-${selectedBoard.value.rows}`);
+// Set the computed class for rows and columns based on selected board
+const gridClass = computed(() => `game-board-grid-${selectedBoard.value.rows}-${selectedBoard.value.cols}`);
 
 const importCards = async (numberOfCards) => {
   const cards = [];
@@ -133,7 +132,7 @@ onBeforeUnmount(() => {
         </option>
       </select>
     </div>
-    <div class="grid" :class="[gridCols, gridRows]">
+    <div class="grid" :class="[gridClass]">
       <div
           v-if="matchedCards < numberOfCards"
           class="relative w-24 h-32 perspective cursor-pointer"
