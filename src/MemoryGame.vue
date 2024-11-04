@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import Card from "@/components/Card.vue";
 
 const boardSizes = [
@@ -15,7 +15,11 @@ const matchedCards = ref(0);
 const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
-const selectedBoard = ref(boardSizes[0]);
+const selectedBoard = ref(boardSizes[0].value); // Use `value` here to store just rows and cols
+
+// Set the computed classes for rows and columns based on selected board
+const gridCols = computed(() => `grid-cols-${selectedBoard.value.cols}`);
+const gridRows = computed(() => `grid-rows-${selectedBoard.value.rows}`);
 
 const importCards = async (numberOfCards) => {
   const cards = [];
@@ -49,7 +53,7 @@ const shuffleArray = (array) => {
 };
 
 const setupGame = async () => {
-  cards.value = await importCards(numberOfCards);
+  cards.value = await importCards(numberOfCards.value);
   matchedCards.value = 0;
 };
 
@@ -89,7 +93,7 @@ const checkForMatch = () => {
   }
   flippedCards.value = [];
 
-  if (matchedCards.value === numberOfCards) {
+  if (matchedCards.value === numberOfCards.value) {
     clearInterval(timerInterval.value);
   }
 };
@@ -101,11 +105,11 @@ const resetGame = () => {
   timerStarted.value = false;
   flippedCards.value = [];
   matchedCards.value = 0;
-  setupGame(); // Restart the game
+  setupGame();
 };
 
-const changeBoardSize = (boardSize) => {
-  numberOfCards = ((boardSize.rows * boardSize.cols) / 2);
+const changeBoardSize = () => {
+  numberOfCards.value = (selectedBoard.value.rows * selectedBoard.value.cols) / 2;
   resetGame();
 };
 
@@ -123,13 +127,13 @@ onBeforeUnmount(() => {
     <h1 class="text-lg p-8 justify-center">Time taken: {{ timer }} seconds</h1>
     <div class="flex flex-row items-center justify-center mb-4">
       <h1>Select Board Size:</h1>
-      <select v-model="selectedBoard" @change="changeBoardSize(selectedBoard) " class="mx-1.5">
+      <select v-model="selectedBoard" @change="changeBoardSize" class="mx-1.5">
         <option v-for="size in boardSizes" :key="size.label" :value="size.value">
           {{ size.label }}
         </option>
       </select>
     </div>
-    <div :class="`grid grid-cols-${selectedBoard.cols} grid-rows-${selectedBoard.rows}`">
+    <div class="grid" :class="[gridCols, gridRows]">
       <div
           v-if="matchedCards < numberOfCards"
           class="relative w-24 h-32 perspective cursor-pointer"
