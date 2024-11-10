@@ -1,31 +1,33 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import {ref, onMounted, onBeforeUnmount, computed, watch} from "vue";
 import Card from "@/components/Card.vue";
+import axios from 'axios';
+import {pop} from "@jridgewell/set-array";
 
-const boardSizes = [
-  { label: '3 x 4', value: { rows: 3, cols: 4 } },
-  { label: '4 x 4', value: { rows: 4, cols: 4 } },
-  { label: '6 x 6', value: { rows: 6, cols: 6 } },
-];
 
-let numberOfCards = ref(6);
+
 const cards = ref([]);
 const flippedCards = ref([]);
 const matchedCards = ref(0);
 const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
-const selectedBoard = ref(boardSizes[0].value); // Use `value` here to store just rows and cols
+
+
+const props = defineProps({listOfBoards: Object})
+
+const numberOfCards = computed(() => (props.listOfBoards.numberOfCards));
+
 
 // Set the computed class for rows and columns based on selected board
-const gridClass = computed(() => `game-board-grid-${selectedBoard.value.rows}-${selectedBoard.value.cols}`);
+const gridClass = computed(() => `game-board-grid-${props.listOfBoards.value[0].rows}-${props.listOfBoards.value[0].cols}`);
 
-const importCards = async (numberOfCards) => {
+const importCards = async (numberOfPairs) => {
   const cards = [];
   const prefixes = ['c', 'e', 'p', 'o'];
   const numbersOfCards = ['1', '2', '3', '4', '5', '6', '7', '11', '12', '13'];
 
-  for (let i = 1; i <= numberOfCards; i++) {
+  for (let i = 1; i <= numberOfPairs; i++) {
     const randomPrefixIndex = Math.floor(Math.random() * prefixes.length);
     const iconPath = await import(`@/assets/cards/${prefixes[randomPrefixIndex]}${numbersOfCards[i % numbersOfCards.length]}.png`);
 
@@ -52,7 +54,7 @@ const shuffleArray = (array) => {
 };
 
 const setupGame = async () => {
-  cards.value = await importCards(numberOfCards.value);
+  cards.value = await importCards(numberOfCards.value/2);
   matchedCards.value = 0;
 };
 
@@ -107,10 +109,17 @@ const resetGame = () => {
   setupGame();
 };
 
-const changeBoardSize = () => {
-  numberOfCards.value = (selectedBoard.value.rows * selectedBoard.value.cols) / 2;
-  resetGame();
-};
+watch(
+    () => props.listOfBoards,
+    (newBoardConfig) => {
+      if (newBoardConfig) {
+        resetGame(); // Reset the game with new board config
+      }
+    },
+    { immediate: true, deep: true } // Immediate triggers on mount, deep observes nested changes
+);
+
+
 
 onMounted(() => {
   setupGame();
@@ -124,14 +133,6 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
     <h1 class="text-lg p-8 justify-center">Time taken: {{ timer }} seconds</h1>
-    <div class="flex flex-row items-center justify-center mb-4">
-      <h1>Select Board Size:</h1>
-      <select v-model="selectedBoard" @change="changeBoardSize" class="mx-1.5">
-        <option v-for="size in boardSizes" :key="size.label" :value="size.value">
-          {{ size.label }}
-        </option>
-      </select>
-    </div>
     <div class="grid" :class="[gridClass]">
       <div
           v-if="matchedCards < numberOfCards"
