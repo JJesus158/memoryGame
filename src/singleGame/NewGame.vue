@@ -1,35 +1,20 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import axios from "axios";
 import MemoryGame from "@/singleGame/Game.vue";
+import { useBoardStore } from '@/stores/board'
+const boardStore = useBoardStore();
 
-const listOfBoards = ref(null)
+onMounted(async () => {
+  await boardStore.loadBoards();
+});
 
+const listOfBoards = computed(() => boardStore.listOfBoards);
 
-const loadBoards = async () => {
-  const response = await axios.get("/boards");
-  const boards = response.data.data
-  listOfBoards.value = boards.map((board)=>{
-        return {
-          'id': board.id,
-          'label': `${board.board_rows} x ${board.board_cols}`,
-          'value': [{rows: board.board_rows,cols: board.board_cols}],
-          'numberOfCards': board.numberOfCards
-        }
-      }
-  )
-}
-
-/*TODO CIRAR UM GAME
-* TODO MELHORAR  repetiçao de codigo do loadBoards
-*
-* */
-
-onMounted(()=> {
-  loadBoards();
-})
 
 </script>
+
+
 
 <template>
   <div class="flex flex-col h-screen items-center w-screen">

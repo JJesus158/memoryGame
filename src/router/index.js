@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Games from "@/singleGame/Games.vue";
-import MemoryGame from "@/singleGame/Game.vue";
+import NewGame from "@/singleGame/NewGame.vue";
+import Game from "@/singleGame/Game.vue";
+import Games from "@/Games.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,18 +36,19 @@ const router = createRouter({
 
        */
     {
-      path: '/',
+      path: '/games',
       name:'games',
       component: Games
     },
     {
-      path: '/game',
-      redirect: '/',
+      path: '/newgame',
+      name: 'newgame',
+      component: NewGame
     },
     {
       path:'/game/:id',
       name: 'game',
-      component: MemoryGame,
+      component: Game,
       props: route => ({ id: parseInt(route.params.id) })
     }
   ]
