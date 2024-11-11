@@ -1,10 +1,8 @@
 <script setup>
-import {ref, onMounted, onBeforeUnmount, computed, watch} from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Card from "@/components/Card.vue";
 import axios from 'axios';
-import {pop} from "@jridgewell/set-array";
-
-
+import router from "@/router/index.js";
 
 const cards = ref([]);
 const flippedCards = ref([]);
@@ -12,15 +10,49 @@ const matchedCards = ref(0);
 const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
+const listOfBoards = ref([]);
+const selectedBoard = ref(null);
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+});
+
+const loadBoard = async () => {
+  const response = await axios.get("/boards");
+  const boards = response.data.data;
+  listOfBoards.value = boards.map((board) => ({
+    id: board.id,
+    label: `${board.board_rows} x ${board.board_cols}`,
+    value: [{ rows: board.board_rows, cols: board.board_cols }],
+    numberOfCards: board.numberOfCards,
+  }));
+};
+
+const getSelectedBoard = (boards) => {
+  selectedBoard.value = boards.find((board) => board.id === props.id);
+};
 
 
-const props = defineProps({listOfBoards: Object})
+watch(listOfBoards, (newBoards) => {
+  if (newBoards.length > 0) {
+    getSelectedBoard(newBoards);
+    setupGame()
+  }
 
-const numberOfCards = computed(() => (props.listOfBoards.numberOfCards));
+});
+
+const numberOfCards = computed(() => selectedBoard.value ? selectedBoard.value.numberOfCards : 0);
 
 
-// Set the computed class for rows and columns based on selected board
-const gridClass = computed(() => `game-board-grid-${props.listOfBoards.value[0].rows}-${props.listOfBoards.value[0].cols}`);
+const gridClass = computed(() => {
+  if (selectedBoard.value) {
+    return `game-board-grid-${selectedBoard.value.value[0].rows}-${selectedBoard.value.value[0].cols}`;
+  }
+  return '';
+});
 
 const importCards = async (numberOfPairs) => {
   const cards = [];
@@ -28,6 +60,7 @@ const importCards = async (numberOfPairs) => {
   const numbersOfCards = ['1', '2', '3', '4', '5', '6', '7', '11', '12', '13'];
 
   for (let i = 1; i <= numberOfPairs; i++) {
+
     const randomPrefixIndex = Math.floor(Math.random() * prefixes.length);
     const iconPath = await import(`@/assets/cards/${prefixes[randomPrefixIndex]}${numbersOfCards[i % numbersOfCards.length]}.png`);
 
@@ -54,7 +87,9 @@ const shuffleArray = (array) => {
 };
 
 const setupGame = async () => {
-  cards.value = await importCards(numberOfCards.value/2);
+  console.log(numberOfCards.value)
+  cards.value = await importCards(numberOfCards.value / 2);
+
   matchedCards.value = 0;
 };
 
@@ -94,8 +129,11 @@ const checkForMatch = () => {
   }
   flippedCards.value = [];
 
-  if (matchedCards.value === numberOfCards.value) {
+  if (matchedCards.value === numberOfCards.value/2) {
     clearInterval(timerInterval.value);
+    setTimeout(()=>{
+      router.push('/')
+    },2500)
   }
 };
 
@@ -106,23 +144,11 @@ const resetGame = () => {
   timerStarted.value = false;
   flippedCards.value = [];
   matchedCards.value = 0;
-  setupGame();
+  setupGame()
 };
 
-watch(
-    () => props.listOfBoards,
-    (newBoardConfig) => {
-      if (newBoardConfig) {
-        resetGame(); // Reset the game with new board config
-      }
-    },
-    { immediate: true, deep: true } // Immediate triggers on mount, deep observes nested changes
-);
-
-
-
 onMounted(() => {
-  setupGame();
+  loadBoard();
 });
 
 onBeforeUnmount(() => {
@@ -132,10 +158,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-    <h1 class="text-lg p-8 justify-center">Time taken: {{ timer }} seconds</h1>
-    <div class="grid" :class="[gridClass]">
+    <div class="grid" :class="gridClass" >
       <div
-          v-if="matchedCards < numberOfCards"
+          v-show="matchedCards < numberOfCards/2"
           class="relative w-24 h-32 perspective cursor-pointer"
           v-for="card in cards"
           :key="card.id"
@@ -144,9 +169,14 @@ onBeforeUnmount(() => {
         <Card :icon="card.icon" :flipped="card.flipped" :matched="card.matched" />
       </div>
     </div>
-    <div v-if="matchedCards >= numberOfCards" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div v-show="matchedCards >= numberOfCards / 2" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 class="mb-1.5">Finished!</h1>
-      <button class="bg-blue-200 p-3.5 rounded-full text-gray-50" @click="resetGame">Play Again</button>
+      <h1 class="flex justify-center">In {{timer}} seconds</h1>
     </div>
+    <div class="flex flex-col m-5">
+      <h1 class="flex justify-center">Time</h1>
+      <h1 class="flex justify-center">{{timer}} seconds</h1>
+    </div>
+
   </div>
 </template>
