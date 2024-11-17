@@ -5,7 +5,7 @@ import axios from 'axios'
 
 export const useBoardStore = defineStore('board', () => {
     const listOfBoards = ref(null)
-
+    const board=ref(null)
 
     const loadBoards = async () => {
         const response = await axios.get("/boards");
@@ -21,5 +21,20 @@ export const useBoardStore = defineStore('board', () => {
         )
     }
 
-   return{listOfBoards, loadBoards}
+
+    const fetchBoard = async (id) => {
+            const response = await axios.get(`/boards/${id}`);
+            const boardData = response.data.data;
+
+            return {
+                id: boardData.id,
+                label: `${boardData.board_rows} x ${boardData.board_cols}`,
+                value: [{ rows: boardData.board_rows, cols: boardData.board_cols }],
+                numberOfCards: boardData.numberOfCards,
+            };
+    };
+
+
+
+   return{listOfBoards, loadBoards, fetchBoard, board};
 });

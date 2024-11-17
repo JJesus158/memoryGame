@@ -1,9 +1,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Card from "@/components/Card.vue";
-import axios from 'axios';
 import router from "@/router/index.js";
-import {useBoardStore} from "@/stores/board.js";
+import { useBoardStore } from "@/stores/board.js";
 
 const cards = ref([]);
 const flippedCards = ref([]);
@@ -12,11 +11,11 @@ const matchedCards = ref(0);
 const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
-const selectedBoard = ref(null);
-//stores
-const boardStore = useBoardStore();
-const listOfBoards = computed(() => boardStore.listOfBoards);
 
+const selectedBoard = ref(null);
+
+// stores
+const boardStore = useBoardStore();
 
 const props = defineProps({
   id: {
@@ -26,21 +25,14 @@ const props = defineProps({
 });
 
 
-const getSelectedBoard = (boards) => {
-  selectedBoard.value = boards.find((board) => board.id === props.id);
-};
+watch(()=>props.id, async (newIDValue)=>{
+  selectedBoard.value = await boardStore.fetchBoard(newIDValue)
+  setupGame()
+},
+{ immediate: true });
 
 
-watch(listOfBoards, (newBoards) => {
-  if (newBoards.length > 0) {
-    getSelectedBoard(newBoards);
-    setupGame()
-  }
-
-});
-
-const numberOfCards = computed(() => selectedBoard.value ? selectedBoard.value.numberOfCards : 0);
-
+const numberOfCards = computed(() => (selectedBoard.value ? selectedBoard.value.numberOfCards : 0));
 
 const gridClass = computed(() => {
   if (selectedBoard.value) {
@@ -71,8 +63,7 @@ const importCards = async (numberOfPairs) => {
         matched: false,
         id: cardKey,
       };
-      console.log(card)
-      cards.push(card, { ...card }); // Add the pair
+      cards.push(card, { ...card });
     }
 
     i++;
@@ -80,7 +71,6 @@ const importCards = async (numberOfPairs) => {
 
   return shuffleArray(cards);
 };
-
 
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -91,9 +81,7 @@ const shuffleArray = (array) => {
 };
 
 const setupGame = async () => {
-  console.log(numberOfCards.value)
   cards.value = await importCards(numberOfCards.value / 2);
-
   matchedCards.value = 0;
 };
 
@@ -133,11 +121,11 @@ const checkForMatch = () => {
   }
   flippedCards.value = [];
 
-  if (matchedCards.value === numberOfCards.value/2) {
+  if (matchedCards.value === numberOfCards.value / 2) {
     clearInterval(timerInterval.value);
-    setTimeout(()=>{
-      router.push('/')
-    },2500)
+    setTimeout(() => {
+      router.push('/newgame');
+    }, 2500);
   }
 };
 
@@ -148,12 +136,9 @@ const resetGame = () => {
   timerStarted.value = false;
   flippedCards.value = [];
   matchedCards.value = 0;
-  setupGame()
+  setupGame();
 };
 
-onMounted(async () => {
-  await boardStore.loadBoards();
-});
 
 onBeforeUnmount(() => {
   clearInterval(timerInterval.value);
@@ -161,10 +146,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  {{selectedBoard}}
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-    <div class="grid" :class="gridClass" >
+    <div class="grid" :class="gridClass">
       <div
-          v-show="matchedCards < numberOfCards/2"
+          v-show="matchedCards < numberOfCards / 2"
           class="relative w-24 h-32 perspective cursor-pointer"
           v-for="card in cards"
           :key="card.id"
@@ -175,12 +161,11 @@ onBeforeUnmount(() => {
     </div>
     <div v-show="matchedCards >= numberOfCards / 2" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <h1 class="mb-1.5">Finished!</h1>
-      <h1 class="flex justify-center">In {{timer}} seconds</h1>
+      <h1 class="flex justify-center">In {{ timer }} seconds</h1>
     </div>
     <div class="flex flex-col m-5">
       <h1 class="flex justify-center">Time</h1>
-      <h1 class="flex justify-center">{{timer}} seconds</h1>
+      <h1 class="flex justify-center">{{ timer }} seconds</h1>
     </div>
-
   </div>
 </template>

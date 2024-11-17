@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import NewGame from "@/singleGame/NewGame.vue";
 import Game from "@/singleGame/Game.vue";
 import Games from "@/Games.vue";
+import Login from "@/Login.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,11 @@ const router = createRouter({
       name: 'game',
       component: Game,
       props: route => ({ id: parseInt(route.params.id) })
+    },
+    {
+      path:'/login',
+      name: 'login',
+      component: Login
     }
   ]
 })
