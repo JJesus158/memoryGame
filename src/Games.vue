@@ -29,6 +29,6 @@ onMounted(()=>{
 </script>
 
 <template>
-<h1>afds</h1>
+<h1>List of Games</h1>
 </template>
 

@@ -18,7 +18,6 @@ const listOfBoards = computed(() => boardStore.listOfBoards);
 
 <template>
   <div class="flex flex-col h-screen items-center w-screen">
-    <h1 class="text-6xl">Memory Game</h1>
     <h1 class="mt-20">Select a Game:</h1>
     <RouterLink v-for="board in listOfBoards" :to="{ name: 'game', params: { id: board.id}}" class="flex justify-between w-1/2 bg-blue-200 items-center h-1/6 m-5 p-10">
       <h1 class="text-4xl" >{{board.id}}</h1>

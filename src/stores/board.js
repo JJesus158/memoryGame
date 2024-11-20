@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import Router from "@/router/index.js";
 
 
 export const useBoardStore = defineStore('board', () => {
@@ -23,6 +24,7 @@ export const useBoardStore = defineStore('board', () => {
 
 
     const fetchBoard = async (id) => {
+        try {
             const response = await axios.get(`/boards/${id}`);
             const boardData = response.data.data;
 
@@ -32,6 +34,13 @@ export const useBoardStore = defineStore('board', () => {
                 value: [{ rows: boardData.board_rows, cols: boardData.board_cols }],
                 numberOfCards: boardData.numberOfCards,
             };
+        }catch (error) {
+            console.log(error.status);
+            if (error.status === 404 || error.status === 401) {
+                Router.push('/login');
+            }
+        }
+
     };
 
 
