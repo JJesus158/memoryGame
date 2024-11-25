@@ -2,6 +2,7 @@
 import { useAuthStore } from '@/stores/auth'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import GlobalAlertDialog from "@/common/GlobalAlertDialog.vue";
+import ChatBox from '@/components/ChatBox.vue'
 import {useTemplateRef, provide, ref} from "vue";
 
 const alertDialog = useTemplateRef('alert-dialog')
@@ -49,6 +50,7 @@ your credentials.`)
       <RouterLink v-show="!storeAuth.user" :to="{ name: 'login'}">Login</RouterLink>
     </div>
   </div>
+  <ChatBox></ChatBox>
   <RouterView></RouterView>
 </template>
 
