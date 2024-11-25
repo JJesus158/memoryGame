@@ -3,6 +3,7 @@ import NewGame from "@/singleGame/NewGame.vue";
 import Game from "@/singleGame/Game.vue";
 import Games from "@/Games.vue";
 import Login from "@/Login.vue";
+import {useAuthStore} from "@/stores/auth.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +59,24 @@ const router = createRouter({
       component: Login
     }
   ]
+})
+
+let handlingFirstRoute = true
+
+router.beforeEach(async (to, from, next) => {
+  const storeAuth = useAuthStore()
+
+  if (handlingFirstRoute) {
+    handlingFirstRoute = false
+    await storeAuth.restoreToken()
+  }
+
+  if (((to.name === 'games') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
+  next()
 })
 
 export default router

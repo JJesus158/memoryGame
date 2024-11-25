@@ -10,9 +10,15 @@ export const useAuthStore = defineStore('auth', () => {
     const storeError = useErrorStore()
     const user = ref(null)
     const token = ref('')
+
+    const userId = computed(() => {
+        return user.value ? user.value.id : ''
+    })
+
     const userName = computed(() => {
         return user.value ? user.value.name : ''
     })
+
     const userFirstLastName = computed(() => {
         const names = userName.value.trim().split(' ')
         const firstName = names[0] ?? ''
@@ -44,6 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
     const clearUser = () => {
         resetIntervalToRefreshToken()
         user.value = null
+        localStorage.removeItem('token')
         axios.defaults.headers.common.Authorization = ''
     }
 
@@ -54,6 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
                 throw new Error("Login response doesn't contain token")
             }
             token.value = responseLogin.data.token
+            localStorage.setItem('token', token.value)
             axios.defaults.headers.common.Authorization = 'Bearer ' + token.value
             const responseUser = await axios.get('users/me')
             user.value = responseUser.data.data
@@ -115,8 +123,27 @@ export const useAuthStore = defineStore('auth', () => {
 
         return intervalToRefreshToken
     }
+
+    const restoreToken = async function () {
+        let storedToken = localStorage.getItem('token')
+        if (storedToken) {
+            try {
+                token.value = storedToken
+                axios.defaults.headers.common.Authorization = 'Bearer ' + token.value
+                const responseUser = await axios.get('users/me')
+                user.value = responseUser.data.data
+                repeatRefreshToken()
+                return true
+            } catch {
+                clearUser()
+                return false
+            }
+        }
+        return false
+    }
+
     return {
-        user, userName, userEmail, userType, userGender, userPhotoUrl,
-        login, logout
+        user, userId,userName, userEmail, userType, userGender, userPhotoUrl,
+        login, logout, restoreToken
     }
 })

@@ -38,6 +38,9 @@ your credentials.`)
       <RouterLink :to="{ name: 'newgame'}" >
         NewGame
       </RouterLink>
+      <RouterLink :to="{ name: 'games'}" >
+        Games
+      </RouterLink>
     </div>
     <div class="relative flex flex-row items-center">
       <img v-show="storeAuth.user" class="w-14 h-14 rounded-full"

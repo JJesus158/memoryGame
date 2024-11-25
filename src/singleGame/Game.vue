@@ -3,6 +3,9 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Card from "@/components/Card.vue";
 import router from "@/router/index.js";
 import { useBoardStore } from "@/stores/board.js";
+import {useGameStore} from "@/stores/game.js";
+import {useAuthStore} from "@/stores/auth.js";
+
 
 const cards = ref([]);
 const flippedCards = ref([]);
@@ -23,6 +26,10 @@ const props = defineProps({
     required: true,
   },
 });
+
+
+const gameStore = useGameStore();
+const authStore = useAuthStore();
 
 
 watch(()=>props.id, async (newIDValue)=>{
@@ -97,6 +104,8 @@ const flipCard = (card) => {
   if (!card.flipped && flippedCards.value.length < 2) {
     if (!timerStarted.value) {
       startTimer();
+      gameStore.insertGame(newGame);
+
     }
 
     card.flipped = true;
@@ -129,15 +138,16 @@ const checkForMatch = () => {
   }
 };
 
-const resetGame = () => {
-  clearInterval(timerInterval.value);
-  cards.value = [];
-  timer.value = 0;
-  timerStarted.value = false;
-  flippedCards.value = [];
-  matchedCards.value = 0;
-  setupGame();
-};
+const newGame = {
+  created_user_id: authStore.userId,
+  winner_user_id: null,
+  type: 'S',
+  status: 'PL',
+  beganAt: new Date().getTime(),
+  endedAt: null,
+  totalTime: null,
+  board_id: props.id
+}
 
 
 onBeforeUnmount(() => {
@@ -146,6 +156,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  {{newGame}}
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
     <div class="grid" :class="gridClass">
       <div
