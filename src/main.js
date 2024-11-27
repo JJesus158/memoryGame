@@ -6,7 +6,17 @@ import axios from "axios";
 import {createPinia} from "pinia";
 import router from "@/router/index.js";
 
+const apiDomain = import.meta.env.VITE_API_DOMAIN
 
-axios.defaults.baseURL = 'http://localhost/api'
+console.log('api domain', apiDomain)
 
-createApp(App).use(router).use(createPinia()).mount('#app')
+const app = createApp(App)
+
+app.use(router)
+app.use(createPinia())
+
+axios.defaults.baseURL = `http://${apiDomain}/api`
+
+app.provide('serverBaseUrl', apiDomain)
+
+app.mount('#app')

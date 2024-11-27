@@ -5,7 +5,11 @@ const chatVisible = ref(false);
 const messages = ref([]);
 const userInput = ref('');
 
-let ws = new WebSocket("ws://localhost:8081", 'echo-protocol');
+const wsConnection = import.meta.env.VITE_WS_CONNECTION;
+
+console.log(wsConnection);
+
+let ws = new WebSocket(wsConnection, 'echo-protocol');
 
 ws.onerror = (event) => {
     messages.value.push({ text: "Connection to WebSocket failed.", server: true });
