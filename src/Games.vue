@@ -37,18 +37,18 @@ onMounted(async () => {
         </p>
         <p class="text-sm text-gray-500 mb-1">
           <span class="font-medium">Started:</span>
-          {{ new Date(game.beganAt).toLocaleString() }}
+          {{ new Date(game.began_at).toLocaleString() }}
         </p>
         <p class="text-sm text-gray-500 mb-1">
           <span class="font-medium">Ended:</span>
-          {{ game.endedAt ? new Date(game.endedAt).toLocaleString() : "N/A" }}
+          {{ game.ended_at ? new Date(game.ended_at).toLocaleString() : "N/A" }}
         </p>
         <p class="text-sm text-gray-500 mb-1">
           <span class="font-medium">Total Time:</span>
-          {{ game.totalTime }} seconds
+          {{ game.total_time }} seconds
         </p>
         <p class="text-sm text-gray-500 mb-1">
-          <span class="font-medium">Board ID:</span> {{ game.boardId }}
+          <span class="font-medium">Board ID:</span> {{ game.board_id }}
         </p>
 
         <!-- Admin-only Details -->
@@ -56,7 +56,7 @@ onMounted(async () => {
           <h3 class="text-sm font-medium text-gray-700 mb-1">Admin Information:</h3>
           <p class="text-sm text-gray-500 mb-1">
             <span class="font-medium">Created by User ID:</span>
-            {{ game.createdUserId }}
+            {{ game.created_user_id }}
           </p>
           <p class="text-sm text-gray-500 mb-1">
             <span class="font-medium">Winner User ID:</span>

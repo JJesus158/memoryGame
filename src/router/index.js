@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import NewGame from "@/singleGame/NewGame.vue";
+import NewGame from "@/singleGame/CreateGame.vue";
 import Game from "@/singleGame/Game.vue";
 import Games from "@/Games.vue";
 import Login from "@/Login.vue";
@@ -48,7 +48,7 @@ const router = createRouter({
       component: NewGame
     },
     {
-      path:'/game/:id',
+      path:'/games/:id',
       name: 'game',
       component: Game,
       props: route => ({ id: parseInt(route.params.id) })

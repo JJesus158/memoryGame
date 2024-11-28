@@ -3,9 +3,7 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Card from "@/components/Card.vue";
 import router from "@/router/index.js";
 import { useBoardStore } from "@/stores/board.js";
-import {useGameStore} from "@/stores/game.js";
-import {useAuthStore} from "@/stores/auth.js";
-
+import { useGameStore } from "@/stores/game.js";
 
 const cards = ref([]);
 const flippedCards = ref([]);
@@ -15,9 +13,11 @@ const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
 
-const selectedBoard = ref(null);
+const selectedBoard = ref(null); // Initialize as null until fetched
+const game = ref(null);
+const gameFinished = ref(false); // Prevent multiple calls to finishGame
 
-// stores
+const gameStore = useGameStore();
 const boardStore = useBoardStore();
 
 const props = defineProps({
@@ -27,73 +27,25 @@ const props = defineProps({
   },
 });
 
-
-const gameStore = useGameStore();
-const authStore = useAuthStore();
-
-
-watch(()=>props.id, async (newIDValue)=>{
-  selectedBoard.value = await boardStore.fetchBoard(newIDValue)
-  setupGame()
-},
-{ immediate: true });
-
-
-const numberOfCards = computed(() => (selectedBoard.value ? selectedBoard.value.numberOfCards : 0));
-
 const gridClass = computed(() => {
-  if (selectedBoard.value) {
+  if (selectedBoard.value?.value?.[0]) {
     return `game-board-grid-${selectedBoard.value.value[0].rows}-${selectedBoard.value.value[0].cols}`;
   }
-  return '';
+  return "game-board-grid-default";
 });
 
-const importCards = async (numberOfPairs) => {
-  const cards = [];
-  const prefixes = ['c', 'e', 'p', 'o'];
-  const numbersOfCards = ['1', '2', '3', '4', '5', '6', '7', '11', '12', '13'];
-  const uniqueCards = new Set();
-
-  let i = 0;
-  while (uniqueCards.size < numberOfPairs) {
-    const prefix = prefixes[i % prefixes.length];
-    const number = numbersOfCards[Math.floor(i / prefixes.length) % numbersOfCards.length];
-    const cardKey = `${prefix}${number}`;
-
-    if (!uniqueCards.has(cardKey)) {
-      uniqueCards.add(cardKey);
-      const iconPath = await import(`@/assets/cards/${cardKey}.png`);
-
-      const card = {
-        icon: iconPath.default,
-        flipped: false,
-        matched: false,
-        id: cardKey,
-      };
-      cards.push(card, { ...card });
-    }
-
-    i++;
-  }
-
-  return shuffleArray(cards);
-};
-
-const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-};
-
 const setupGame = async () => {
-  cards.value = await importCards(numberOfCards.value / 2);
-  matchedCards.value = 0;
+  if (game.value) {
+    cards.value = game.value.custom.cards;
+    matchedCards.value = game.value.custom.cards.filter((card) => card.matched).length;
+    timer.value = game.value.total_time;
+  }
 };
 
 const startTimer = () => {
-  timer.value = 0; // Reset timer
+  if (!timerStarted.value) {
+    game.value.began_at = gameStore.formatDate(new Date());
+  }
   timerStarted.value = true;
   timerInterval.value = setInterval(() => {
     timer.value++;
@@ -104,13 +56,10 @@ const flipCard = (card) => {
   if (!card.flipped && flippedCards.value.length < 2) {
     if (!timerStarted.value) {
       startTimer();
-      gameStore.insertGame(newGame);
-
     }
 
     card.flipped = true;
     flippedCards.value.push(card);
-
     if (flippedCards.value.length === 2) {
       setTimeout(checkForMatch, 1000);
     }
@@ -130,37 +79,54 @@ const checkForMatch = () => {
   }
   flippedCards.value = [];
 
-  if (matchedCards.value === numberOfCards.value / 2) {
-    clearInterval(timerInterval.value);
-    setTimeout(() => {
-      router.push('/newgame');
-    }, 2500);
+  if (matchedCards.value === selectedBoard.value.numberOfCards / 2) {
+    finishGame();
   }
 };
 
-const newGame = {
-  created_user_id: authStore.userId,
-  winner_user_id: null,
-  type: 'S',
-  status: 'PL',
-  beganAt: new Date().getTime(),
-  endedAt: null,
-  totalTime: null,
-  board_id: props.id
-}
+const finishGame = async () => {
+  if (gameFinished.value) return;
+  gameFinished.value = true;
 
+  clearInterval(timerInterval.value);
+  game.value.status = "E";
+  game.value.total_time = timer.value;
+  game.value.custom.cards = cards.value;
+  game.value.ended_at = gameStore.formatDate(new Date());
+
+  await gameStore.updateGame(game.value); // Persist the game state
+};
 
 onBeforeUnmount(() => {
+  if (game.value.status === "PL") {
+    game.value.total_time = timer.value;
+    game.value.status = "I";
+    game.value.custom.cards = cards.value;
+    gameStore.updateGame(game.value);
+  }
   clearInterval(timerInterval.value);
+});
+
+onMounted(async () => {
+  game.value = await gameStore.fetchGame(props.id);
+  selectedBoard.value = await boardStore.fetchBoard(game.value.board_id);
+  game.value.status = "PL";
+  await gameStore.updateGame(game.value);
+  await setupGame();
+});
+
+watch(selectedBoard, (newBoard) => {
+  if (newBoard) {
+    setupGame();
+  }
 });
 </script>
 
 <template>
-  {{newGame}}
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
     <div class="grid" :class="gridClass">
       <div
-          v-show="matchedCards < numberOfCards / 2"
+          v-show="matchedCards < selectedBoard?.numberOfCards / 2"
           class="relative w-24 h-32 perspective cursor-pointer"
           v-for="card in cards"
           :key="card.id"
@@ -169,10 +135,21 @@ onBeforeUnmount(() => {
         <Card :icon="card.icon" :flipped="card.flipped" :matched="card.matched" />
       </div>
     </div>
-    <div v-show="matchedCards >= numberOfCards / 2" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+
+    <div
+        v-show="matchedCards >= selectedBoard?.numberOfCards / 2"
+        class="flex flex-col items-center justify-center min-h-screen bg-gray-100"
+    >
       <h1 class="mb-1.5">Finished!</h1>
       <h1 class="flex justify-center">In {{ timer }} seconds</h1>
+      <button
+          @click="router.push('/newgame')"
+          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        Start New Game
+      </button>
     </div>
+
     <div class="flex flex-col m-5">
       <h1 class="flex justify-center">Time</h1>
       <h1 class="flex justify-center">{{ timer }} seconds</h1>
