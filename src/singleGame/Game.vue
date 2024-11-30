@@ -13,9 +13,9 @@ const timer = ref(0);
 const timerInterval = ref(null);
 const timerStarted = ref(false);
 
-const selectedBoard = ref(null); // Initialize as null until fetched
+const selectedBoard = ref(null);
 const game = ref(null);
-const gameFinished = ref(false); // Prevent multiple calls to finishGame
+const gameFinished = ref(false);
 
 const gameStore = useGameStore();
 const boardStore = useBoardStore();
@@ -38,6 +38,8 @@ const setupGame = async () => {
   if (game.value) {
     cards.value = game.value.custom.cards;
     matchedCards.value = game.value.custom.cards.filter((card) => card.matched).length;
+
+    flippedCards.value = game.value.custom.cards.filter((card) => card.flipped);
     timer.value = game.value.total_time;
   }
 };

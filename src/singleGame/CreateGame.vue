@@ -61,7 +61,6 @@ const createGame = async (board) => {
 
 
 
-  // Create the new game object
   const cards = await importCards(numberOfCards / 2); // Get shuffled cards
   const newGame = {
     created_user_id: null,

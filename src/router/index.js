@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NewGame from "@/singleGame/CreateGame.vue";
 import Game from "@/singleGame/Game.vue";
-import Games from "@/Games.vue";
+import Games from "@/History/Games.vue";
 import Login from "@/Login.vue";
 import {useAuthStore} from "@/stores/auth.js";
+import Transaction from "@/Transactions/Transaction.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,6 +58,11 @@ const router = createRouter({
       path:'/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/shop',
+      name: 'shop',
+      component: Transaction
     }
   ]
 })

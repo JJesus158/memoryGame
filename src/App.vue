@@ -3,13 +3,20 @@ import { useAuthStore } from '@/stores/auth'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import GlobalAlertDialog from "@/common/GlobalAlertDialog.vue";
 import ChatBox from '@/components/ChatBox.vue'
-import {useTemplateRef, provide, ref} from "vue";
+import {useTemplateRef, provide, ref, watch} from "vue";
 
 const alertDialog = useTemplateRef('alert-dialog')
+
 console.log(alertDialog)
 provide('alertDialog', alertDialog)
 
 const storeAuth = useAuthStore()
+
+watch(() => storeAuth.userBalance, (newBalance) => {
+  // This will trigger every time userBalance changes
+  console.log('User balance updated:', newBalance)
+})
+
 const logoutConfirmed = () => {
   storeAuth.logout()
   toggleDropDowntMenu()
@@ -42,10 +49,12 @@ your credentials.`)
         Games
       </RouterLink>
     </div>
-    <div class="relative flex flex-row items-center">
+    <div class="relative flex flex-row items-center min-w-32 justify-center">
       <img v-show="storeAuth.user" class="w-14 h-14 rounded-full"
            :src="storeAuth.userPhotoUrl" alt="Rounded avatar" @click="toggleDropDowntMenu">
-      <div v-if="dropDownMenu" class="absolute right-0 top-full mt-2 bg-white shadow-md rounded p-2">
+      <div v-if="dropDownMenu" class="absolute  top-full mt-2 bg-white shadow-md rounded p-2">
+        <h1>{{storeAuth.userName}}</h1>
+        <h1>{{storeAuth.userBalance}} coins</h1>
         <button class="text-red-600 font-bold" @click="logout">
           Logout
         </button>

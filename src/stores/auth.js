@@ -15,6 +15,10 @@ export const useAuthStore = defineStore('auth', () => {
         return user.value ? user.value.id : ''
     })
 
+    const userBalance = computed(() => {
+        return user.value ? user.value.brain_coins_balance : '';
+    })
+
     const userName = computed(() => {
         return user.value ? user.value.name : ''
     })
@@ -144,6 +148,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         user, userId,userName, userEmail, userType, userGender, userPhotoUrl,
-        login, logout, restoreToken
+        login, logout, restoreToken, userBalance
     }
 })
