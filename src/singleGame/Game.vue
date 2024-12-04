@@ -8,6 +8,7 @@ import { useGameStore } from "@/stores/game.js";
 const cards = ref([]);
 const flippedCards = ref([]);
 const matchedCards = ref(0);
+const total_turns = ref(0);
 
 const timer = ref(0);
 const timerInterval = ref(null);
@@ -38,7 +39,7 @@ const setupGame = async () => {
   if (game.value) {
     cards.value = game.value.custom.cards;
     matchedCards.value = game.value.custom.cards.filter((card) => card.matched).length;
-
+    //total_turns.value = game.value
     flippedCards.value = game.value.custom.cards.filter((card) => card.flipped);
     timer.value = game.value.total_time;
   }
@@ -84,6 +85,7 @@ const checkForMatch = () => {
   if (matchedCards.value === selectedBoard.value.numberOfCards / 2) {
     finishGame();
   }
+  total_turns.value++;
 };
 
 const finishGame = async () => {

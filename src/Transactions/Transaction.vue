@@ -1,23 +1,37 @@
 <script setup>
 import { useTransactionStore } from "@/stores/transaction.js";
-import { onMounted, ref, watch } from "vue";
-import { useGameStore } from "@/stores/game.js";
+import { onMounted, ref } from "vue";
 
 const storeTransaction = useTransactionStore();
 const listOfTransactions = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 
+const paymentType = ref("");
+const reference = ref("");
+const value = ref(0);
+
+const processPayment = () => {
+  if (!paymentType.value || !reference.value || value.value <= 0) {
+    alert("Please fill all the fields correctly.");
+    return;
+  }
+
+  const paymentData = {
+    "type": paymentType.value,
+    "reference": reference.value,
+    "value": value.value,
+  };
+  storeTransaction.insertTransaction(paymentData)
 
 
+};
 
 onMounted(async () => {
   await storeTransaction.loadTransactions(1);
   listOfTransactions.value = storeTransaction.listOfTransactions;
   totalPages.value = storeTransaction.totalPages;
 });
-
-
 
 const loadPage = async (page) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -26,8 +40,6 @@ const loadPage = async (page) => {
     listOfTransactions.value = storeTransaction.listOfTransactions;
   }
 };
-
-
 </script>
 
 <template>
@@ -36,18 +48,17 @@ const loadPage = async (page) => {
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-4">
       <h1 class="text-2xl font-bold text-gray-800">Purchase Brain Coins</h1>
       <p class="text-sm text-gray-500 mt-1">
-        Select a payment method, enter the reference and amount (in €). Note: Ensure input matches the required format for each type.
+        Select a payment method, enter the reference, and amount (in €). Note: Ensure input matches the required format for each type.
       </p>
     </div>
 
-    <!-- Payment Form -->
     <div class="max-w-6xl mx-auto mt-4 bg-white rounded-lg shadow-md p-4">
-      <form class="space-y-4">
-        <!-- Payment Type -->
+      <form @submit.prevent="processPayment" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700" for="paymentType">Payment Type</label>
           <select
               id="paymentType"
+              v-model="paymentType"
               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
           >
             <option value="" disabled>Select payment type</option>
@@ -67,9 +78,9 @@ const loadPage = async (page) => {
           <label class="block text-sm font-medium text-gray-700" for="reference">Reference</label>
           <input
               id="reference"
+              v-model="reference"
               type="text"
               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-              placeholder="e.g., 915785345 for MBWAY, john.doe@gmail.com for PAYPAL"
           />
         </div>
 
@@ -78,6 +89,7 @@ const loadPage = async (page) => {
           <label class="block text-sm font-medium text-gray-700" for="value">Amount (€)</label>
           <input
               id="value"
+              v-model="value"
               type="number"
               min="1"
               max="99"
@@ -89,7 +101,6 @@ const loadPage = async (page) => {
           </p>
         </div>
 
-        <!-- Submit Button -->
         <div>
           <button
               type="submit"
@@ -99,7 +110,6 @@ const loadPage = async (page) => {
           </button>
         </div>
       </form>
-
     </div>
 
     <!-- Transaction History Section -->
@@ -122,7 +132,7 @@ const loadPage = async (page) => {
           </thead>
           <tbody>
           <tr v-for="transaction in listOfTransactions" :key="transaction.id">
-            <td class="px-4 py-2 border-b">{{ storeTransaction.formatDate(transaction.transaction_datetime) }}</td>
+            <td class="px-4 py-2 border-b">{{transaction.transaction_datetime ? new Date(transaction.transaction_datetime).toLocaleString() : 'N/A' }}</td>
             <td class="px-4 py-2 border-b">{{ transaction.type }}</td>
             <td class="px-4 py-2 border-b">{{ transaction.euros }}</td>
             <td class="px-4 py-2 border-b">{{ transaction.payment_type ?? '-' }}</td>

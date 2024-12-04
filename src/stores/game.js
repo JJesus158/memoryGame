@@ -11,9 +11,19 @@ import router from "@/router/index.js";
 export const useGameStore = defineStore('game', () => {
     const listOfGames = ref([])
     const storeError = useErrorStore();
+    const totalPages = ref(1);
 
-    const loadGames = async () => {
-        const response = await axios.get("/games");
+
+    const loadGames = async (currentPage) => {
+        const response = await axios.get("/games", {
+            params: {
+                page: currentPage
+            }
+        });
+
+
+        totalPages.value = response.data.meta.last_page;
+
         listOfGames.value = response.data.data.map((game) => ({
             id: game.id,
             created_user_id: game.created_user_id,
@@ -23,6 +33,7 @@ export const useGameStore = defineStore('game', () => {
             began_at: game.began_at,
             ended_at: game.ended_at,
             total_time: game.total_time,
+            board_size: game.board_size,
             board_id: game.board_id,
             custom: game.custom,
         }));
@@ -88,7 +99,7 @@ export const useGameStore = defineStore('game', () => {
             return false
         }
     }
-
+//TODO
     const deleteGame = async (project) => {
         storeError.resetMessages()
         try {
@@ -105,5 +116,5 @@ export const useGameStore = defineStore('game', () => {
     }
 
 
-    return{loadGames, listOfGames, insertGame, fetchGame, updateGame, formatDate};
+    return{loadGames, listOfGames, insertGame, fetchGame, updateGame, formatDate, totalPages};
 });
