@@ -26,8 +26,9 @@ export const useGameStore = defineStore('game', () => {
 
         listOfGames.value = response.data.data.map((game) => ({
             id: game.id,
-            created_user_id: game.created_user_id,
-            winner_user_id: game.winner_user_id,
+            createdUser: game.created_user,
+            winnerUser: game.winner,
+            winner_nickname: game.winner_nickname,
             type: game.type,
             status: game.status,
             began_at: game.began_at,
@@ -35,24 +36,20 @@ export const useGameStore = defineStore('game', () => {
             total_time: game.total_time,
             board_size: game.board_size,
             board_id: game.board_id,
+            total_turns: game.total_turns,
             custom: game.custom,
         }));
     }
 
-    const getIndexOfProject = (gameId) => {
+    const getIndexOfGame= (gameId) => {
         return listOfGames.value.findIndex((p) => p.id === gameId)
     }
 
 
-    const formatDate = (date) => {
-        const pad = (num) => num.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-    };
-
     const fetchGame = async (gameId) => {
         storeError.resetMessages()
         const response = await axios.get('games/' + gameId)
-        const index = getIndexOfProject(gameId)
+        const index = getIndexOfGame(gameId)
         if (index > -1) {
             // Instead of a direct assignment, object is cloned/copied to the array
             // This ensures that the object in the array is not the same as the object fetched
@@ -73,7 +70,7 @@ export const useGameStore = defineStore('game', () => {
             })
             return response.data.data
         } catch (e) {
-            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error creating project!')
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error creating game!')
             return false
         }
     }
@@ -84,14 +81,14 @@ export const useGameStore = defineStore('game', () => {
             console.log(game)
             console.log(game.id)
             const response = await axios.put('games/' + game.id, game)
-            const index = getIndexOfProject(game.id)
+            const index = getIndexOfGame(game.id)
             if (index > -1) {
                 // Instead of a direct assignment, object is cloned/copied to the array
                 // This ensures that the object in the array is not the same as the object fetched
                 listOfGames.value[index] = Object.assign({}, response.data.data)
             }
             toast({
-                description: 'Project has been updated correctly!',
+                description: 'Game has been updated correctly!',
             })
             return response.data.data
         } catch (e) {
@@ -100,21 +97,21 @@ export const useGameStore = defineStore('game', () => {
         }
     }
 //TODO
-    const deleteGame = async (project) => {
+    const deleteGame = async (game) => {
         storeError.resetMessages()
         try {
-            await axios.delete('projects/' + project.id)
-            const index = getIndexOfProject(project.id)
+            await axios.delete('games/' + project.id)
+            const index = getIndexOfGame(project.id)
             if (index > -1) {
-                projects.value.splice(index, 1)
+                games.value.splice(index, 1)
             }
             return true
         } catch (e) {
-            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting project!')
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting game!')
             return false
         }
     }
 
 
-    return{loadGames, listOfGames, insertGame, fetchGame, updateGame, formatDate, totalPages};
+    return{loadGames, listOfGames, insertGame, fetchGame, updateGame, totalPages};
 });

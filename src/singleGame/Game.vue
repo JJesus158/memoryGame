@@ -39,7 +39,7 @@ const setupGame = async () => {
   if (game.value) {
     cards.value = game.value.custom.cards;
     matchedCards.value = game.value.custom.cards.filter((card) => card.matched).length;
-    //total_turns.value = game.value
+    total_turns.value = game.value.total_turns;
     flippedCards.value = game.value.custom.cards.filter((card) => card.flipped);
     timer.value = game.value.total_time;
   }

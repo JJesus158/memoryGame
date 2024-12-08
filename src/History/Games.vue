@@ -49,8 +49,9 @@ const loadPage = async (page) => {
           <th class="text-left px-4 py-2 border-b">Ended</th>
           <th class="text-left px-4 py-2 border-b">Total Time</th>
           <th class="text-left px-4 py-2 border-b">Size of Board</th>
-          <th v-if="storeAuth.userType === 'A'" class="text-left px-4 py-2 border-b">Created By</th>
-          <th v-if="storeAuth.userType === 'A'" class="text-left px-4 py-2 border-b">Winner ID</th>
+          <th class="text-left px-4 py-2 border-b">Number of Turns</th>
+          <th class="text-left px-4 py-2 border-b">Created By</th>
+          <th class="text-left px-4 py-2 border-b">Winner</th>
         </tr>
         </thead>
         <tbody>
@@ -64,11 +65,9 @@ const loadPage = async (page) => {
           <td class="px-4 py-2 border-b">{{ game.ended_at ? new Date(game.ended_at).toLocaleString() : 'N/A' }}</td>
           <td class="px-4 py-2 border-b">{{ game.total_time }} seconds</td>
           <td class="px-4 py-2 border-b">{{ game.board_size }}</td>
-          <td class="px-4 py-2 border-b">{{game.total_turns}}</td>
-
-          <!-- Admin-specific columns -->
-          <td v-if="storeAuth.userType === 'A'" class="px-4 py-2 border-b">{{ game.created_user_id }}</td>
-          <td v-if="storeAuth.userType === 'A'" class="px-4 py-2 border-b">{{ game.winnerUserId || "N/A" }}</td>
+          <td class="px-4 py-2 border-b">{{game.total_turns || 'N/A'}}</td>
+          <td class="px-4 py-2 border-b">{{ game.createdUser?.nickname || 'N/A'}}</td>
+          <td class="px-4 py-2 border-b">{{ game.winnerUser?.nickname|| "N/A" }}</td>
         </tr>
         </tbody>
       </table>

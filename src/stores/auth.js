@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useErrorStore } from '@/stores/error'
 import { useRouter } from 'vue-router'
 import avatarNoneAssetURL from '@/assets/miscellaneous_small/20.png'
+import {toast} from "@/components/ui/toast/index.js";
 
 export const useAuthStore = defineStore('auth', () => {
     const router = useRouter()
@@ -11,9 +12,11 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref(null)
     const token = ref('')
 
+
     const userId = computed(() => {
         return user.value ? user.value.id : ''
     })
+
 
     const userBalance = computed(() => {
         return user.value ? user.value.brain_coins_balance : '';
@@ -38,19 +41,24 @@ export const useAuthStore = defineStore('auth', () => {
         return user.value ? user.value.type : ''
     })
 
-    const userGender = computed(() => {
-        return user.value ? user.value.gender : ''
+    const userBlocked = computed(() => {
+        return user.value ? user.value.blocked : false
     })
 
-    const userPhotoUrl = computed(() => {
-        const photoFile = user.value ? user.value.photoFileName ?? '' : ''
-        if (photoFile) {
-            return axios.defaults.baseURL.replaceAll("/api", photoFile)
-        }
-        return avatarNoneAssetURL
+    const userNickName = computed(() => {
+        return user.value? user.value.nickname : ''
     })
 
-// This function is "private" - not exported by the store
+        const userPassword = computed(() => {
+            return user.value ? user.value.password : ''
+        })
+
+    const userPhoto = computed(() => {
+        return user.value ? user.value.photo : avatarNoneAssetURL;
+
+    })
+
+
     const clearUser = () => {
         resetIntervalToRefreshToken()
         user.value = null
@@ -98,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-// These 2 functions and intervalToRefreshToken variable are "private" - not exported
+
     let intervalToRefreshToken = null
     const resetIntervalToRefreshToken = () => {
         if (intervalToRefreshToken) {
@@ -146,8 +154,51 @@ export const useAuthStore = defineStore('auth', () => {
         return false
     }
 
+    const registerProfile = async (userInfo) => {
+        storeError.resetMessages()
+        console.log(userInfo)
+        try {
+            const response = await axios.post('auth/register', userInfo)
+            toast({
+                description: 'Your Profile has been updated correctly!',
+            })
+            return response.data.data
+        } catch (e) {
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating project!')
+            return false
+        }
+    }
+
+    const updateProfile = async function (userInfo) {
+        storeError.resetMessages()
+        console.log(userInfo)
+        try {
+            const response = await axios.patch('users/me', userInfo)
+            toast({
+                description: 'Your Profile has been updated correctly!',
+            })
+            return response.data.data
+        } catch (e) {
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating project!')
+            return false
+        }
+    }
+
+
+
+    const deleteAccount = async function () {
+        storeError.resetMessages()
+        try {
+            await axios.delete('users/' + userId.value)
+            return true
+        } catch (e) {
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting the account!')
+            return false
+        }
+    }
+
     return {
-        user, userId,userName, userEmail, userType, userGender, userPhotoUrl,
-        login, logout, restoreToken, userBalance
+        user, userId,userName, userEmail, userType, userPhoto,
+        login, logout, restoreToken, userBalance, userNickName, userBlocked, deleteAccount, userPassword, updateProfile, registerProfile
     }
 })

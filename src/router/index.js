@@ -5,6 +5,9 @@ import Games from "@/History/Games.vue";
 import Login from "@/Login.vue";
 import {useAuthStore} from "@/stores/auth.js";
 import Transaction from "@/Transactions/Transaction.vue";
+import UserProfile from "@/user/UserProfile.vue";
+import ProfileUpdateForm from "@/user/ProfileUpdateForm.vue";
+import Register from "@/user/Register.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,7 +66,23 @@ const router = createRouter({
       path: '/shop',
       name: 'shop',
       component: Transaction
+    },
+    {
+      path:'/me',
+      name: 'me',
+      component: UserProfile
+    },
+    {
+      path: '/me/edit',
+      name: 'editMe',
+      component: ProfileUpdateForm
+    },
+    {
+      path:'/register',
+      name: 'register',
+      component: Register
     }
+
   ]
 })
 
