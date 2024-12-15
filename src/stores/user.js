@@ -60,8 +60,7 @@ export const useUserStore = defineStore('user', () => {
             console.log(response.data.data)
             listOfUsers.value.push(response.data.data)
             toast({
-                description: `User #${response.data.data.id} 
-                              was created!`
+                description: `Please verify the email!`
             })
             return response.data.data
         } catch (e) {

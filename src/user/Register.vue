@@ -118,7 +118,7 @@ const handlePhotoUpload = (event) => {
   }
 };
 
-// Register user
+
 const register = async () => {
   try {
     await authStore.registerProfile({

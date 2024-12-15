@@ -1,13 +1,14 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useBoardStore } from '@/stores/board';
-import { useAuthStore } from "@/stores/auth.js";
 import { useGameStore } from "@/stores/game.js";
 import router from "@/router/index.js";
+import {useAuthStore} from "@/stores/auth.js";
+
 
 const boardStore = useBoardStore();
-const authStore = useAuthStore();
 const gameStore = useGameStore();
+const authStore = useAuthStore();
 
 onMounted(async () => {
   await boardStore.loadBoards();
@@ -63,7 +64,7 @@ const createGame = async (board) => {
 
   const cards = await importCards(numberOfCards / 2); // Get shuffled cards
   const newGame = {
-    created_user_id: null,
+    created_user_id: authStore.userId,
     winner_user_id: null,
     type: 'S',
     status: 'PL',
@@ -74,25 +75,55 @@ const createGame = async (board) => {
     custom: { cards: cards },
   };
 
+  if(authStore.user !== null) {
+    const game = await gameStore.insertGame(newGame);
+    await router.push({name: 'game', params: {id: game.id}});
+  }else {
+    await router.push({name: 'guestGame'});
+  }
 
-  const game = await gameStore.insertGame(newGame);
-  await router.push({ name: 'game', params: { id: game.id } });
 };
 </script>
 
 <template>
-  <div class="flex flex-col h-screen items-center w-screen">
-    <h1 class="mt-20">Select a Game:</h1>
-    <div v-for="board in listOfBoards" :key="board.id" class="flex justify-between w-1/2 bg-blue-200 items-center h-1/6 m-5 p-10" @click="createGame(board)">
-      <h1 class="text-4xl">{{ board.id }}</h1>
-      <div class="flex flex-col">
-        <h2 class="text-2xl">Number Of Pairs</h2>
-        <h2 class="flex text-lg justify-center">{{ board.numberOfCards / 2 }}</h2>
+  <div class="flex flex-col h-screen items-center w-screen bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+    <h1 class="mt-16 text-5xl font-extrabold text-white drop-shadow-lg">
+      Choose Your Game Board
+    </h1>
+    <p v-if="!authStore.user" class="mt-2 text-lg font-light">
+      Unlock challenging boards by logging in and playing!
+    </p>
+
+    <div
+        v-for="board in listOfBoards"
+        :key="board.id"
+        class="relative flex flex-col justify-center items-center w-3/4 md:w-1/3 lg:w-1/4 bg-white text-gray-800 shadow-xl rounded-xl p-8 m-6 transform transition duration-300 hover:scale-105"
+        :class="{ 'opacity-60 cursor-not-allowed': !authStore.user && (board.id === 2 || board.id === 3) }"
+        :title="!authStore.user && (board.id === 2 || board.id === 3) ? 'Login required to unlock this game!' : ''"
+        @click="!authStore.user && (board.id === 2 || board.id === 3) ? null : createGame(board)"
+    >
+
+      <div
+          v-if="!authStore.user && (board.id === 2 || board.id === 3)"
+          class="absolute top-4 right-4 text-gray-400 text-3xl"
+      >
+        🔒
       </div>
-      <div class="flex flex-col">
-        <h2 class="text-2xl">Board</h2>
-        <h2 class="flex justify-center text-lg">{{ board.label }}</h2>
+
+      <h1 class="text-3xl font-semibold mb-2">Board {{ board.id }}</h1>
+
+      <div class="flex flex-col text-center">
+        <p class="text-lg font-medium mb-1">Pairs: {{ board.numberOfCards / 2 }}</p>
+        <p class="text-lg font-light">Size: {{ board.label }}</p>
       </div>
+
+      <button
+          v-if="authStore.user || board.id !== 2 && board.id !== 3"
+          class="mt-6 bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
+      >
+        Start Game
+      </button>
     </div>
   </div>
 </template>
+

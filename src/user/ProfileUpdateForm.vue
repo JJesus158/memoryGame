@@ -12,8 +12,6 @@ const newUserName = ref(authStore.userName || "");
 const newUserEmail = ref(authStore.userEmail || "");
 const newUserNickName = ref(authStore.userNickName || "");
 const newUserPhoto = ref(""); // Will hold the Base64 string of the uploaded image
-
-// Reactive property for the file
 const fileInput = ref(null);
 
 // Convert image file to Base64

@@ -8,6 +8,10 @@ import Transaction from "@/Transactions/Transaction.vue";
 import UserProfile from "@/user/UserProfile.vue";
 import ProfileUpdateForm from "@/user/ProfileUpdateForm.vue";
 import Register from "@/user/Register.vue";
+import AnonymousGame from "@/singleGame/AnonymousGame.vue";
+import ErrorPage from "@/components/ErrorPage.vue";
+import {Home} from "lucide-vue-next";
+import Dashboard from "@/Dashboard.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +45,11 @@ const router = createRouter({
     },
 
        */
+    {
+      path: '/',
+      name: 'home',
+      component: Dashboard,
+    },
     {
       path: '/games',
       name:'games',
@@ -81,8 +90,17 @@ const router = createRouter({
       path:'/register',
       name: 'register',
       component: Register
+    },
+    {
+      path: '/guestGame',
+      name: 'guestGame',
+      component: AnonymousGame
+    },
+    {
+      path: '/error/:errorCode',
+      name: 'ErrorPage',
+      component: ErrorPage
     }
-
   ]
 })
 
@@ -101,7 +119,23 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
+  if (((to.name === 'shop') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (((to.name === 'me') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (((to.name === 'game') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
   next()
 })
+
 
 export default router
