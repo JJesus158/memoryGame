@@ -47,7 +47,7 @@ const setupGame = async () => {
 
 const startTimer = () => {
   if (!timerStarted.value) {
-    game.value.began_at = gameStore.formatDate(new Date());
+    game.value.began_at = new Date().toLocaleString();
   }
   timerStarted.value = true;
   timerInterval.value = setInterval(() => {
@@ -96,13 +96,13 @@ const finishGame = async () => {
   game.value.status = "E";
   game.value.total_time = timer.value;
   game.value.custom.cards = cards.value;
-  game.value.ended_at = gameStore.formatDate(new Date());
+  game.value.ended_at = new Date().toLocaleString();
 
   await gameStore.updateGame(game.value); // Persist the game state
 };
 
 onBeforeUnmount(() => {
-  if (game.value.status === "PL") {
+  if (game.value?.status === "PL") {
     game.value.total_time = timer.value;
     game.value.status = "I";
     game.value.custom.cards = cards.value;
@@ -112,11 +112,28 @@ onBeforeUnmount(() => {
 });
 
 onMounted(async () => {
-  game.value = await gameStore.fetchGame(props.id);
-  selectedBoard.value = await boardStore.fetchBoard(game.value.board_id);
-  game.value.status = "PL";
-  await gameStore.updateGame(game.value);
-  await setupGame();
+  try {
+    game.value = await gameStore.fetchGame(props.id);
+
+    // Check if game is null or not found
+    if (!game.value) {
+      // Handle the error by redirecting or displaying a message
+      console.error("Game not found.");
+      await router.push({ name: "ErrorPage", params: { errorCode: "403" } });
+      return; // Don't proceed further if game is not available
+    }
+
+    selectedBoard.value = await boardStore.fetchBoard(game.value.board_id);
+
+    // Initialize the game status and update the store
+    game.value.status = "PL";
+    await gameStore.updateGame(game.value);
+    await setupGame();
+  } catch (error) {
+    console.error("An error occurred during game setup:", error);
+    // Redirect to an error page or show an error message
+    await router.push({ name: "ErrorPage", params: { errorCode: "500" } });
+  }
 });
 
 watch(selectedBoard, (newBoard) => {
@@ -128,7 +145,7 @@ watch(selectedBoard, (newBoard) => {
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-    <div class="grid" :class="gridClass">
+    <div class="grid gap-4" :class="gridClass">
       <div
           v-show="matchedCards < selectedBoard?.numberOfCards / 2"
           class="relative w-24 h-32 perspective cursor-pointer"

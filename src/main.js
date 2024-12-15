@@ -17,6 +17,17 @@ app.use(createPinia())
 
 axios.defaults.baseURL = `http://${apiDomain}/api`
 
+axios.interceptors.response.use(
+    response => response, // Pass successful responses through
+    error => {
+        if (error.response && error.response.status >= 400 && error.response.status < 500) {
+            // Check for specific status codes if needed (e.g., error.response.status === 403)
+            router.push({ name: 'ErrorPage', params: { errorCode: error.response.status } });
+        }
+        return Promise.reject(error); // Reject the promise so other error handlers can act
+    }
+);
+
 app.provide('serverBaseUrl', apiDomain)
 
 app.mount('#app')

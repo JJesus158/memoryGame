@@ -67,6 +67,6 @@ const login = () => {
         Login
       </Button>
     </CardFooter>
-    {{storeAuth.userName}}
+
   </Card>
 </template>
