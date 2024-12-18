@@ -86,7 +86,7 @@ const createGame = async (board) => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen items-center w-screen bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+  <div class="flex flex-col items-center w-screen bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
     <h1 class="mt-16 text-5xl font-extrabold text-white drop-shadow-lg">
       Choose Your Game Board
     </h1>
