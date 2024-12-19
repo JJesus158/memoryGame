@@ -1,11 +1,10 @@
-import { ref, computed } from 'vue'
+import { ref, } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import Router from "@/router/index.js";
+
 import {useErrorStore} from "@/stores/error.js";
 import {toast} from "@/components/ui/toast/index.js";
-import {ToastAction} from "radix-vue";
-import router from "@/router/index.js";
+
 
 
 export const useUserStore = defineStore('user', () => {
@@ -14,11 +13,12 @@ export const useUserStore = defineStore('user', () => {
     const totalPages = ref(1);
 
 
-    const loadUser = async (currentPage) => {
+    const loadUsers = async (currentPage) => {
         const response = await axios.get("/users", {
             params: {
                 page: currentPage
             }
+
         });
 
 
@@ -92,7 +92,7 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 //TODO
-    const deleteUser = async (user) => {
+    const deleteUser = async () => {
         storeError.resetMessages()
         try {
             await axios.delete('users/' + project.id)
@@ -108,5 +108,5 @@ export const useUserStore = defineStore('user', () => {
     }
 
 
-    return{loadUser, listOfUsers, insertUser, fetchUser, updateUser, totalPages};
+    return{loadUsers, listOfUsers, insertUser, fetchUser, updateUser, totalPages};
 });
