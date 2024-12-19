@@ -22,7 +22,7 @@ const isProfilePage = computed(() => route.name === 'me');
   <GlobalAlertDialog ref="alert-dialog"></GlobalAlertDialog>
   <div class="flex flex-row justify-between items-center m-4 min-h-14">
     <div class="flex space-x-4">
-      <b>MemoryGame</b>
+      <RouterLink :to="{ name: 'home'}" >MemoryGame</RouterLink>
       <RouterLink :to="{ name: 'newgame'}" >
         NewGame
       </RouterLink>
