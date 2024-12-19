@@ -92,7 +92,7 @@ const logout = () => {
 
       <RouterLink class="flex text-green-900 font-bold justify-center mt-4" :to="{ name: 'editMe' }">Edit Account</RouterLink>
 
-      <button class="text-red-600 font-extrabold mt-4" @click="removeAccount">
+      <button v-if="type === 'P'" class="text-red-600 font-extrabold mt-4" @click="removeAccount">
         Delete Account
       </button>
     </div>

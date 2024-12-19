@@ -12,6 +12,8 @@ import AnonymousGame from "@/singleGame/AnonymousGame.vue";
 import ErrorPage from "@/components/ErrorPage.vue";
 import {Home} from "lucide-vue-next";
 import Dashboard from "@/Dashboard.vue";
+import UsersList from "@/History/UsersList.vue";
+import RegisterAdmin from "@/user/RegisterAdmin.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -100,7 +102,18 @@ const router = createRouter({
       path: '/error/:errorCode',
       name: 'ErrorPage',
       component: ErrorPage
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UsersList
+    },
+    {
+      path: '/register',
+      name: 'registerAdmin',
+      component: RegisterAdmin
     }
+
   ]
 })
 

@@ -31,6 +31,7 @@ const isProfilePage = computed(() => route.name === 'me');
       </RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{name: 'shop'}">Shop</RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{ name: 'me' }">Profile</RouterLink>
+      <RouterLink v-show="storeAuth.userType === 'A'" :to="{ name: 'users' }">Users</RouterLink>
     </div>
     <div class="relative flex flex-row items-center min-w-32 justify-center">
       <RouterLink v-if="storeAuth.user && !isProfilePage" :to="{ name: 'me' }">

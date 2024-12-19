@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', () => {
     const totalPages = ref(1);
 
 
-    const loadUser = async (currentPage) => {
+    const loadUsers = async (currentPage) => {
         const response = await axios.get("/users", {
             params: {
                 page: currentPage
@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
             type: user.type,
             nickname: user.nickname,
             blocked: user.blocked,
-            brain_coins: user.brain_coins,
+            brain_coins_balance: user.brain_coins_balance,
             photoFileName: user.photoFileName,
         }));
     }
@@ -95,16 +95,17 @@ export const useUserStore = defineStore('user', () => {
   
 
 
-
-//TODO
     const deleteUser = async (user) => {
         storeError.resetMessages()
         try {
-            await axios.delete('users/' + project.id)
-            const index = getIndexOfUser(project.id)
+            await axios.delete('users/' + user.id)
+            const index = getIndexOfUser(user.id)
             if (index > -1) {
-                users.value.splice(index, 1)
+                listOfUsers.value.splice(index, 1);
             }
+            toast({
+                description: 'User has been updated correctly!',
+            })
             return true
         } catch (e) {
             storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting user!')
@@ -112,6 +113,67 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
+    const blockUser = async (user) => {
+        storeError.resetMessages();
+        try {
+            const response= await axios.patch(`users/${user.id}`, { action: 'block' }); // Indicate the specific action in the request body
+            const index = getIndexOfUser(user.id)
+            if (index > -1) {
+                // Instead of a direct assignment, object is cloned/copied to the array
+                // This ensures that the object in the array is not the same as the object fetched
+                listOfUsers.value[index] = Object.assign({}, response.data.data)
+            }
+            toast({
+                description: 'User has been updated correctly!',
+            })
+        } catch (e) {
+            storeError.setErrorMessages(
+                e.response?.data?.message || 'Unexpected error occurred.',
+                e.response?.data?.errors || [],
+                e.response?.status || 500,
+                'Error blocking user!'
+            );
+            return false;
+        }
+    };
 
-    return{loadUser, listOfUsers, insertUser, fetchUser, updateUser, totalPages};
+    const unblockUser = async (user) => {
+        storeError.resetMessages();
+        try {
+            const response= await axios.patch(`users/${user.id}`, { action: 'unblock' }); // Indicate the specific action in the request body
+            const index = getIndexOfUser(user.id)
+            if (index > -1) {
+                // Instead of a direct assignment, object is cloned/copied to the array
+                // This ensures that the object in the array is not the same as the object fetched
+                listOfUsers.value[index] = Object.assign({}, response.data.data)
+            }
+            toast({
+                description: 'User has been updated correctly!',
+            })
+        } catch (e) {
+            storeError.setErrorMessages(
+                e.response?.data?.message || 'Unexpected error occurred.',
+                e.response?.data?.errors || [],
+                e.response?.status || 500,
+                'Error unblocking user!'
+            );
+            return false;
+        }
+    };
+
+    const insertAdmin = async (userId) => {
+        storeError.resetMessages()
+        const response = await axios.get('users/' + userId)
+        const index = getIndexOfUser(userId)
+        if (index > -1) {
+            // Instead of a direct assignment, object is cloned/copied to the array
+            // This ensures that the object in the array is not the same as the object fetched
+            listOfUsers.value[index] = Object.assign({}, response.data.data)
+        }
+        return response.data.data
+    }
+
+
+
+    return{loadUsers, listOfUsers, insertUser, fetchUser, updateUser,blockUser, unblockUser, deleteUser,totalPages};
 });

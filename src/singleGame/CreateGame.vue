@@ -98,9 +98,9 @@ const createGame = async (board) => {
         v-for="board in listOfBoards"
         :key="board.id"
         class="relative flex flex-col justify-center items-center w-3/4 md:w-1/3 lg:w-1/4 bg-white text-gray-800 shadow-xl rounded-xl p-8 m-6 transform transition duration-300 hover:scale-105"
-        :class="{ 'opacity-60 cursor-not-allowed': !authStore.user && (board.id === 2 || board.id === 3) }"
-        :title="!authStore.user && (board.id === 2 || board.id === 3) ? 'Login required to unlock this game!' : ''"
-        @click="!authStore.user && (board.id === 2 || board.id === 3) ? null : createGame(board)"
+        :class="{ 'opacity-60 cursor-not-allowed': authStore.userType === 'P' && (board.id === 2 || board.id === 3) }"
+        :title="authStore.userType === 'P' && (board.id === 2 || board.id === 3) ? 'Login required to unlock this game!' : ''"
+        @click="authStore.userType === 'P' && (board.id === 2 || board.id === 3) ? null : createGame(board)"
     >
 
       <div
