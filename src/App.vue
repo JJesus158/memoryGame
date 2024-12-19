@@ -29,6 +29,9 @@ const isProfilePage = computed(() => route.name === 'me');
       <RouterLink v-show="storeAuth.user" :to="{ name: 'games'}" >
         Games
       </RouterLink>
+      <RouterLink v-show="storeAuth.user" :to="{ name: 'users'}" >
+        Users
+      </RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{name: 'shop'}">Shop</RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{ name: 'me' }">Profile</RouterLink>
       <RouterLink v-show="storeAuth.userType === 'A'" :to="{ name: 'users' }">Users</RouterLink>
