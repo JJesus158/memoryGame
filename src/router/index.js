@@ -1,52 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import NewGame from "@/singleGame/CreateGame.vue";
-import Game from "@/singleGame/Game.vue";
-import Games from "@/History/Games.vue";
+import NewGame from "@/game/CreateGame.vue";
+import Game from "@/game/Game.vue";
+import Games from "@/history/Games.vue";
 import Login from "@/Login.vue";
 import {useAuthStore} from "@/stores/auth.js";
-import Transaction from "@/Transactions/Transaction.vue";
+import Transaction from "@/transactions/Transaction.vue";
 import UserProfile from "@/user/UserProfile.vue";
 import ProfileUpdateForm from "@/user/ProfileUpdateForm.vue";
 import Register from "@/user/Register.vue";
-import AnonymousGame from "@/singleGame/AnonymousGame.vue";
+import AnonymousGame from "@/game/AnonymousGame.vue";
 import ErrorPage from "@/components/ErrorPage.vue";
 import {Home} from "lucide-vue-next";
 import Dashboard from "@/Dashboard.vue";
-import UsersList from "@/History/UsersList.vue";
+import UsersList from "@/history/UsersList.vue";
 import RegisterAdmin from "@/user/RegisterAdmin.vue";
+import MultiPlayerGames from '@/game/MultiPlayerGames.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-      /*
-    {
-      path: '/tasks',
-      redirect: { name: 'tasks' }
-    },
-    {
-      path: '/projects',
-      name: 'projects',
-      component: Projects
-    },
-    {
-      path: '/tasks/:id',
-      name: 'updateTask',
-      component: TaskUpdate,
-      props: route => ({ id: parseInt(route.params.id) })
-    },
-    {
-      path: '/projects/:id',
-      name: 'updateProject',
-      component: ProjectUpdate,
-      props: route => ({ id: parseInt(route.params.id) })
-    },
-    {
-      path: '/projects/new',
-      name: 'createProject',
-      component: ProjectCreate,
-    },
-
-       */
     {
       path: '/',
       name: 'home',
@@ -99,6 +71,11 @@ const router = createRouter({
       component: AnonymousGame
     },
     {
+      path: '/multi',
+      name: 'multi',
+      component: MultiPlayerGames
+    },
+    {
       path: '/error/:errorCode',
       name: 'ErrorPage',
       component: ErrorPage
@@ -143,6 +120,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (((to.name === 'game') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (((to.name === 'multi') && (!storeAuth.user))) {
     next({ name: 'login' })
     return
   }

@@ -16,6 +16,10 @@ onMounted(async () => {
 
 const listOfBoards = computed(() => boardStore.listOfBoards);
 
+const canPlayBoard = (board) => (board.id === 1 || authStore.userType === 'P');
+
+const goToMultiplayer = async () => { await router.push({name: 'multi'}); }
+
 // Create Game function
 const createGame = async (board) => {
   const numberOfCards = board.numberOfCards;
@@ -86,25 +90,35 @@ const createGame = async (board) => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-screen bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+  <div class="flex flex-col items-center w-full bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
     <h1 class="mt-16 text-5xl font-extrabold text-white drop-shadow-lg">
       Choose Your Game Board
     </h1>
+    
     <p v-if="!authStore.user" class="mt-2 text-lg font-light">
       Unlock challenging boards by logging in and playing!
     </p>
+
+    <button
+        :class="{ 'opacity-60 cursor-not-allowed': authStore.userType !== 'P' }"
+        :title="authStore.userType === 'P' ? '' : 'Login required to play multiplayer!'"
+        class="mt-6 bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
+        @click="goToMultiplayer"
+    >
+      Go to Multiplayer Games
+    </button>
 
     <div
         v-for="board in listOfBoards"
         :key="board.id"
         class="relative flex flex-col justify-center items-center w-3/4 md:w-1/3 lg:w-1/4 bg-white text-gray-800 shadow-xl rounded-xl p-8 m-6 transform transition duration-300 hover:scale-105"
-        :class="{ 'opacity-60 cursor-not-allowed': authStore.userType === 'P' && (board.id === 2 || board.id === 3) }"
-        :title="authStore.userType === 'P' && (board.id === 2 || board.id === 3) ? 'Login required to unlock this game!' : ''"
-        @click="authStore.userType === 'P' && (board.id === 2 || board.id === 3) ? null : createGame(board)"
+        :class="{ 'opacity-60 cursor-not-allowed': !canPlayBoard(board) }"
+        :title="canPlayBoard(board) ? '' : 'Login required to unlock this game!'"
+        @click="canPlayBoard(board) ? createGame(board) : null"
     >
 
       <div
-          v-if="!authStore.user && (board.id === 2 || board.id === 3)"
+          v-if="!canPlayBoard(board)"
           class="absolute top-4 right-4 text-gray-400 text-3xl"
       >
         🔒
@@ -118,7 +132,7 @@ const createGame = async (board) => {
       </div>
 
       <button
-          v-if="authStore.user || board.id !== 2 && board.id !== 3"
+          v-if="canPlayBoard(board)"
           class="mt-6 bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
       >
         Start Game

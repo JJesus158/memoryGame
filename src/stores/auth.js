@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useErrorStore } from '@/stores/error'
@@ -9,14 +9,14 @@ import {toast} from "@/components/ui/toast/index.js";
 export const useAuthStore = defineStore('auth', () => {
     const router = useRouter()
     const storeError = useErrorStore()
+    const socket = inject('socket')
+
     const user = ref(null)
     const token = ref('')
-
 
     const userId = computed(() => {
         return user.value ? user.value.id : ''
     })
-
 
     const userBalance = computed(() => {
         return user.value ? user.value.brain_coins_balance : '';
@@ -61,7 +61,11 @@ export const useAuthStore = defineStore('auth', () => {
 
     const clearUser = () => {
         resetIntervalToRefreshToken()
+        if (user.value) {
+            socket.emit('logout', user.value)
+        }
         user.value = null
+        token.value = ''
         localStorage.removeItem('token')
         axios.defaults.headers.common.Authorization = ''
     }
@@ -77,6 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
             axios.defaults.headers.common.Authorization = 'Bearer ' + token.value
             const responseUser = await axios.get('users/me')
             user.value = responseUser.data.data
+            socket.emit('login', user.value)
             repeatRefreshToken() // Ensure this function is defined and doesn't throw
             await router.push({ name: 'newgame' })
             return user.value
@@ -144,6 +149,7 @@ export const useAuthStore = defineStore('auth', () => {
                 axios.defaults.headers.common.Authorization = 'Bearer ' + token.value
                 const responseUser = await axios.get('users/me')
                 user.value = responseUser.data.data
+                socket.emit('login', user.value)
                 repeatRefreshToken()
                 return true
             } catch {

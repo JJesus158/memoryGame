@@ -2,7 +2,6 @@
 import { useAuthStore } from '@/stores/auth'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import GlobalAlertDialog from "@/common/GlobalAlertDialog.vue";
-import ChatBox from '@/components/ChatBox.vue'
 import { useTemplateRef, provide, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 
@@ -22,15 +21,12 @@ const isProfilePage = computed(() => route.name === 'me');
   <GlobalAlertDialog ref="alert-dialog"></GlobalAlertDialog>
   <div class="flex flex-row justify-between items-center m-4 min-h-14">
     <div class="flex space-x-4">
-      <RouterLink :to="{ name: 'home'}" >MemoryGame</RouterLink>
+      <RouterLink :to="{ name: 'home'}" >Memory Game</RouterLink>
       <RouterLink :to="{ name: 'newgame'}" >
-        NewGame
+        New Game
       </RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{ name: 'games'}" >
         Games
-      </RouterLink>
-      <RouterLink v-show="storeAuth.user" :to="{ name: 'users'}" >
-        Users
       </RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{name: 'shop'}">Shop</RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{ name: 'me' }">Profile</RouterLink>
@@ -47,7 +43,6 @@ const isProfilePage = computed(() => route.name === 'me');
       <RouterLink v-else-if="!storeAuth.user && !isProfilePage" :to="{ name: 'login' }">Login</RouterLink>
     </div>
   </div>
-  <ChatBox></ChatBox>
   <RouterView></RouterView>
 </template>
 

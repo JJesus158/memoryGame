@@ -48,12 +48,12 @@ const login = () => {
         <div class="grid items-center w-full gap-4">
           <div class="flex flex-col space-y-1.5">
             <Label for="email">Email</Label>
-            <Input id="email" type="email" placeholder="User Email"  v-model="credentials.email"/>
+            <Input id="email" type="email" placeholder="User Email" v-model="credentials.email" @keydown.enter="login"/>
             <ErrorMessage :errorMessage="storeError.fieldMessage('email')"></ErrorMessage>
           </div>
           <div class="flex flex-col space-y-1.5">
             <Label for="password">Password</Label>
-            <Input id="password" type="password" v-model="credentials.password"/>
+            <Input id="password" type="password" v-model="credentials.password" @keydown.enter="login"/>
             <ErrorMessage :errorMessage="storeError.fieldMessage('password')"></ErrorMessage>
           </div>
         </div>
