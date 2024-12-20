@@ -10,7 +10,7 @@ const flippedCards = ref([]);
 const matchedCards = ref(0);
 const total_turns = ref(0);
 
-const timer = ref(0);
+const timer = ref(0);  // Time in centiseconds (1 centisecond = 10 ms)
 const timerInterval = ref(null);
 const timerStarted = ref(false);
 
@@ -39,7 +39,7 @@ const setupGame = async () => {
   if (game.value) {
     cards.value = game.value.custom.cards;
     matchedCards.value = game.value.custom.cards.filter((card) => card.matched).length;
-    total_turns.value = game.value.total_turns;
+    total_turns.value = game.value.total_turns_winner;
     flippedCards.value = game.value.custom.cards.filter((card) => card.flipped);
     timer.value = game.value.total_time;
   }
@@ -51,8 +51,8 @@ const startTimer = () => {
   }
   timerStarted.value = true;
   timerInterval.value = setInterval(() => {
-    timer.value++;
-  }, 1000);
+    timer.value++;  // Increment by 1 centisecond (0.01 second)
+  }, 10);  // Update every 10 ms (0.01 second)
 };
 
 const flipCard = (card) => {
@@ -86,6 +86,7 @@ const checkForMatch = () => {
     finishGame();
   }
   total_turns.value++;
+  console.log(total_turns.value);
 };
 
 const finishGame = async () => {
@@ -95,6 +96,7 @@ const finishGame = async () => {
   clearInterval(timerInterval.value);
   game.value.status = "E";
   game.value.total_time = timer.value;
+  game.value.total_turns_winner = total_turns.value;
   game.value.custom.cards = cards.value;
   game.value.ended_at = new Date().toLocaleString();
 
@@ -105,6 +107,7 @@ onBeforeUnmount(() => {
   if (game.value?.status === "PL") {
     game.value.total_time = timer.value;
     game.value.status = "I";
+    game.value.total_turns_winner = total_turns.value;
     game.value.custom.cards = cards.value;
     gameStore.updateGame(game.value);
   }
@@ -124,7 +127,6 @@ onMounted(async () => {
     }
 
     selectedBoard.value = await boardStore.fetchBoard(game.value.board_id);
-
     // Initialize the game status and update the store
     game.value.status = "PL";
     await gameStore.updateGame(game.value);
@@ -162,7 +164,7 @@ watch(selectedBoard, (newBoard) => {
         class="flex flex-col items-center justify-center min-h-screen bg-gray-100"
     >
       <h1 class="mb-1.5">Finished!</h1>
-      <h1 class="flex justify-center">In {{ timer }} seconds</h1>
+      <h1 class="flex justify-center">In {{ (timer / 100).toFixed(2) }} seconds & {{total_turns}} moves</h1>  <!-- Showing seconds with 2 decimal places -->
       <button
           @click="router.push('/newgame')"
           class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -171,9 +173,16 @@ watch(selectedBoard, (newBoard) => {
       </button>
     </div>
 
-    <div class="flex flex-col m-5">
-      <h1 class="flex justify-center">Time</h1>
-      <h1 class="flex justify-center">{{ timer }} seconds</h1>
+    <div class="flex flex-row m-5 ">
+      <div class="flex flex-col m-5 ">
+        <h1 class="flex justify-center">Time</h1>
+        <h1 class="flex justify-center">{{ timer / 100 }} seconds</h1>  <!-- Showing seconds with 2 decimal places -->
+      </div>
+      <div class="flex flex-col m-5 ">
+        <h1 class="flex justify-center">Total Turns</h1>
+        <h1 class="flex justify-center">{{ total_turns }}</h1>
+      </div>
+
     </div>
   </div>
 </template>

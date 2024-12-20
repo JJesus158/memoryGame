@@ -5,7 +5,6 @@ import { useAuthStore } from "@/stores/auth.js";
 // Auth Store
 const authStore = useAuthStore();
 const alertDialog = inject("alertDialog");
-
 // Computed Properties
 const id = computed(() => authStore.userId || 0);
 const name = computed(() => authStore.userName || "Anonymous");
@@ -67,7 +66,7 @@ const logout = () => {
       />
       <h2 class="text-xl font-bold mt-4">{{ name }}</h2>
       <p class="text-gray-600 text-sm">{{ email }}</p>
-      <p class="text-gray-500 text-sm mt-1 capitalize">Type: {{ type }}</p>
+      <p class="text-gray-500 text-sm mt-1 capitalize"> {{type ==="P"? "Player" : "Admin"}} </p>
     </div>
 
     <div class="mt-6 border-t border-gray-200 pt-4">

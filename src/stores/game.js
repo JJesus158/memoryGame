@@ -34,9 +34,9 @@ export const useGameStore = defineStore('game', () => {
             began_at: game.began_at,
             ended_at: game.ended_at,
             total_time: game.total_time,
+            total_turns_winner: game.total_turns_winner,
             board_size: game.board_size,
             board_id: game.board_id,
-            total_turns: game.total_turns,
             custom: game.custom,
         }));
     }
@@ -78,8 +78,6 @@ export const useGameStore = defineStore('game', () => {
     const updateGame = async (game) => {
         storeError.resetMessages()
         try {
-            console.log(game)
-            console.log(game.id)
             const response = await axios.put('games/' + game.id, game)
             const index = getIndexOfGame(game.id)
             if (index > -1) {
@@ -90,6 +88,7 @@ export const useGameStore = defineStore('game', () => {
             toast({
                 description: 'Game has been updated correctly!',
             })
+            console.log(response.data.data)
             return response.data.data
         } catch (e) {
             storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating project!')

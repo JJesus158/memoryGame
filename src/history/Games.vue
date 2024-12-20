@@ -65,7 +65,7 @@ const loadPage = async (page) => {
           <td class="px-4 py-2 border-b">{{ game.ended_at ? new Date(game.ended_at).toLocaleString() : 'N/A' }}</td>
           <td class="px-4 py-2 border-b">{{ game.total_time }} seconds</td>
           <td class="px-4 py-2 border-b">{{ game.board_size }}</td>
-          <td class="px-4 py-2 border-b">{{game.total_turns || 'N/A'}}</td>
+          <td class="px-4 py-2 border-b">{{game.total_turns_winner || 'N/A'}}</td>
           <td class="px-4 py-2 border-b">{{ game.createdUser?.nickname || 'N/A'}}</td>
           <td class="px-4 py-2 border-b">{{ game.winnerUser?.nickname|| "N/A" }}</td>
         </tr>
