@@ -4,6 +4,7 @@ import axios from 'axios'
 import Router from "@/router/index.js";
 import {useErrorStore} from "@/stores/error.js";
 import {toast} from "@/components/ui/toast/index.js";
+import {useAuthStore} from "@/stores/auth.js";
 
 
 export const useTransactionStore = defineStore('transaction', () => {
@@ -11,7 +12,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     const listOfTransactions = ref([]);
     const storeError = useErrorStore();
     const totalPages = ref(1);
-
+    const authStore = useAuthStore();
 
 
     const loadTransactions = async (currentPage) => {
@@ -60,6 +61,7 @@ export const useTransactionStore = defineStore('transaction', () => {
                               was created!`
             })
             console.log(response.data.data)
+            await authStore.refreshUserInfo()
             return response.data.data
         } catch (e) {
             storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error creating transaction!')

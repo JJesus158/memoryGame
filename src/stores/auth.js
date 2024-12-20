@@ -5,6 +5,7 @@ import { useErrorStore } from '@/stores/error'
 import { useRouter } from 'vue-router'
 import avatarNoneAssetURL from '@/assets/miscellaneous_small/20.png'
 import {toast} from "@/components/ui/toast/index.js";
+import * as response from "autoprefixer";
 
 export const useAuthStore = defineStore('auth', () => {
     const router = useRouter()
@@ -83,7 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = responseUser.data.data
             socket.emit('login', user.value)
             repeatRefreshToken() // Ensure this function is defined and doesn't throw
-            await router.push({ name: 'newgame' })
+            await router.push({ name: 'home' })
             return user.value
         } catch (e) {
             console.error("Error during login:", e)
@@ -95,6 +96,12 @@ export const useAuthStore = defineStore('auth', () => {
             )
             return false
         }
+    }
+
+    const refreshUserInfo = async () => {
+        const responseUser = await axios.get('users/me')
+        user.value = responseUser.data.data
+        return user.value
     }
 
     const logout = async () => {
@@ -183,6 +190,7 @@ export const useAuthStore = defineStore('auth', () => {
             toast({
                 description: 'Your Profile has been updated correctly!',
             })
+            user.value = response.data.data
             return response.data.data
         } catch (e) {
             storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating project!')
@@ -195,7 +203,7 @@ export const useAuthStore = defineStore('auth', () => {
     const deleteAccount = async function () {
         storeError.resetMessages()
         try {
-            await axios.delete('users/' + userId.value)
+            await axios.delete('users/me/' + userId)
             return true
         } catch (e) {
             storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting the account!')
@@ -205,6 +213,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         user, userId,userName, userEmail, userType, userPhoto,
-        login, logout, restoreToken, userBalance, userNickName, userBlocked, deleteAccount, userPassword, updateProfile, registerProfile
+        login, logout, restoreToken, userBalance, userNickName, userBlocked, deleteAccount, userPassword, updateProfile, registerProfile, refreshUserInfo
     }
 })

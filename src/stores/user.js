@@ -69,7 +69,7 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    //TODO alterar para PATCH -- Duarte
+
     const updateUser = async (user) => {
         storeError.resetMessages()
         try {
@@ -161,17 +161,7 @@ export const useUserStore = defineStore('user', () => {
         }
     };
 
-    const insertAdmin = async (userId) => {
-        storeError.resetMessages()
-        const response = await axios.get('users/' + userId)
-        const index = getIndexOfUser(userId)
-        if (index > -1) {
-            // Instead of a direct assignment, object is cloned/copied to the array
-            // This ensures that the object in the array is not the same as the object fetched
-            listOfUsers.value[index] = Object.assign({}, response.data.data)
-        }
-        return response.data.data
-    }
+
 
 
 

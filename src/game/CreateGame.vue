@@ -15,7 +15,8 @@ onMounted(async () => {
 });
 
 const listOfBoards = computed(() => boardStore.listOfBoards);
-
+const diff = ["Easy", "Medium", "Hard"];
+const diffColors =["text-green-900", "text-yellow-600", "text-red-900"]
 const canPlayBoard = (board) => (board.id === 1 || authStore.userType === 'P');
 
 const goToMultiplayer = async () => { await router.push({name: 'multi'}); }
@@ -90,11 +91,11 @@ const createGame = async (board) => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center w-full bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
+  <div class="flex flex-col items-center min-h-screen w-full bg-gradient-to-br from-blue-500 to-indigo-800 text-white">
     <h1 class="mt-16 text-5xl font-extrabold text-white drop-shadow-lg">
       Choose Your Game Board
     </h1>
-    
+
     <p v-if="!authStore.user" class="mt-2 text-lg font-light">
       Unlock challenging boards by logging in and playing!
     </p>
@@ -121,7 +122,7 @@ const createGame = async (board) => {
           v-if="!canPlayBoard(board)"
           class="absolute top-4 right-4 text-gray-400 text-3xl"
       >
-        🔒
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#B89230"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z"/></svg>
       </div>
 
       <h1 class="text-3xl font-semibold mb-2">Board {{ board.id }}</h1>
@@ -130,13 +131,20 @@ const createGame = async (board) => {
         <p class="text-lg font-medium mb-1">Pairs: {{ board.numberOfCards / 2 }}</p>
         <p class="text-lg font-light">Size: {{ board.label }}</p>
       </div>
+      <div class="flex w-max flex-row items-center justify-between space-x-4">
+        <div class="text-lg font-medium" :class="diffColors[board.id-1]">
+          {{ diff[board.id - 1] }}
+        </div>
+        <button
+            v-if="canPlayBoard(board)"
+            class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
+        >
+          Start Game
+        </button>
 
-      <button
-          v-if="canPlayBoard(board)"
-          class="mt-6 bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300"
-      >
-        Start Game
-      </button>
+      </div>
+
+
     </div>
   </div>
 </template>

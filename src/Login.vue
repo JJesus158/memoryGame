@@ -31,9 +31,7 @@ const cancel = () => {
 }
 
 const login = () => {
-  console.log(credentials.value)
   storeAuth.login(credentials.value)
-
 }
 </script>
 
@@ -59,6 +57,7 @@ const login = () => {
         </div>
       </form>
     </CardContent>
+
     <CardFooter class="flex justify-between px-6 pb-6">
       <Button variant="outline" @click="cancel">
         Cancel
@@ -67,6 +66,7 @@ const login = () => {
         Login
       </Button>
     </CardFooter>
+    <RouterLink class="flex justify-between px-6 pb-6" :to="{ name: 'register' }">Sign Up Now</RouterLink>
 
   </Card>
 </template>

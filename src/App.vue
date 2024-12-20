@@ -11,7 +11,7 @@ provide('alertDialog', alertDialog)
 const storeAuth = useAuthStore()
 
 const route = useRoute();
-const isProfilePage = computed(() => route.name === 'me');
+const isProfilePage = computed(() => route.name === ('me' && 'login'));
 
 </script>
 

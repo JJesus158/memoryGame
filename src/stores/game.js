@@ -96,21 +96,8 @@ export const useGameStore = defineStore('game', () => {
             return false
         }
     }
-//TODO
-    const deleteGame = async (game) => {
-        storeError.resetMessages()
-        try {
-            await axios.delete('games/' + project.id)
-            const index = getIndexOfGame(project.id)
-            if (index > -1) {
-                games.value.splice(index, 1)
-            }
-            return true
-        } catch (e) {
-            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error deleting game!')
-            return false
-        }
-    }
+
+
 
 
     return{loadGames, listOfGames, insertGame, fetchGame, updateGame, totalPages};

@@ -30,7 +30,7 @@ const personalScores = storeAuth.user ? storeGlobalScores.listOfPersonalScores :
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
       </svg>
-      New Single Game
+      New Game
     </RouterLink>
   </div>
 
