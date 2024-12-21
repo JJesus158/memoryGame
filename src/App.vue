@@ -54,6 +54,7 @@ const handleMessageFromInputDialog = (message) => {
       </RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{name: 'shop'}">Shop</RouterLink>
       <RouterLink v-show="storeAuth.user" :to="{ name: 'me' }">Profile</RouterLink>
+      <RouterLink :to="{ name: 'statistics' }">Statistics</RouterLink>
       <RouterLink v-show="storeAuth.userType === 'A'" :to="{ name: 'users' }">Users</RouterLink>
     </div>
     <div class="relative flex flex-row items-center min-w-32 justify-center">

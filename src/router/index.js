@@ -11,6 +11,7 @@ import Register from "@/components/user/Register.vue";
 import AnonymousGame from "@/components/singlePlayer/AnonymousGame.vue";
 import ErrorPage from "@/components/ErrorPage.vue";
 import Dashboard from "@/Dashboard.vue";
+import Statistics from "@/statistics/Statistics.vue";
 import UsersList from "@/components/history/UsersList.vue";
 import RegisterAdmin from "@/components/user/RegisterAdmin.vue";
 import MultiPlayerGames from '@/components/multiPlayer/MultiPlayerGames.vue';
@@ -84,6 +85,11 @@ const router = createRouter({
       path: '/error/:errorCode',
       name: 'ErrorPage',
       component: ErrorPage
+    },
+    {
+      path: '/statistics',
+      name: 'statistics',
+      component: Statistics,
     },
     {
       path: '/users',
