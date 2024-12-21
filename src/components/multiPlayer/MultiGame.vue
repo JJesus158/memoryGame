@@ -24,6 +24,7 @@ const timer = ref(0)
 const totalTurns = ref(0)
 const opponentTimer = ref(0)
 const opponentTotalTurns = ref(0)
+const serverTimeOffset = ref(0)
 
 let timerInterval = null
 let endAtTime = null
@@ -133,7 +134,7 @@ const updateTimer = () => {
   if (game.value == null) return
   if (!gameStarted.value || gameEnded.value) return
   if (game.value.isFirstTurn || game.value.delayActive) return
-  const newTimer = (Date.now() - game.value.turnStartTime) + game.value.playerTimers[game.value.currentPlayer - 1]
+  const newTimer = (Date.now() - game.value.turnStartTime) + game.value.playerTimers[game.value.currentPlayer - 1] - serverTimeOffset.value
   if (currentUserTurn.value) {
     timer.value = newTimer
   } else {
@@ -188,6 +189,10 @@ watch(
       if (newGame.interrupted === true) {
         await gameInterrupted()
         return
+      }
+
+      if (oldGame != null && oldGame.isFirstTurn) {
+        serverTimeOffset.value = Date.now() - newGame.turnStartTime
       }
 
       if (newGame.currentPlayer === storeGames.playerNumberOfCurrentUser(newGame)) {
