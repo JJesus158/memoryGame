@@ -12,23 +12,26 @@ export const useGamesStore = defineStore('games', () => {
     const socket = inject('socket')
 
     const games = ref([])
+    const game = ref(null)
 
     const totalGames = computed(() => games.value.length)
 
     // Use this function to update the game object in the games array
-    const updateGame = (game) => {
-        const gameIndex = games.value.findIndex((g) => g.id === game.id);
+    const updateGame = (gameArg) => {
+        const gameIndex = games.value.findIndex((g) => g.id === gameArg.id);
         if (gameIndex !== -1) {
-            games.value[gameIndex] = { ...game } // shallow copy
+            games.value[gameIndex] = { ...gameArg } // shallow copy
+        }
+
+        if (game.value != null && game.value.id == gameArg.id) {
+            game.value = gameArg
         }
     }
 
-    const playerNumberOfCurrentUser = (game) => {
-        if (game.player1_id === storeAuth.userId) {
-            return 1
-        }
-        if (game.player2_id === storeAuth.userId) {
-            return 2
+    const playerNumberOfCurrentUser = (gameArg) => {
+        for (let i = 0; i < gameArg.players.length; i++) {
+            if (gameArg.players[i].user.id == storeAuth.userId)
+                return i + 1
         }
         return null
     }
@@ -41,8 +44,8 @@ export const useGamesStore = defineStore('games', () => {
         return false
     }
     
-    const removeGameFromList = (game) => {
-        const gameIndex = games.value.findIndex((g) => g.id === game.id)
+    const removeGameFromList = (gameArg) => {
+        const gameIndex = games.value.findIndex((g) => g.id === gameArg.id)
         if (gameIndex >= 0) {
             games.value.splice(gameIndex, 1)
         }
@@ -59,11 +62,18 @@ export const useGamesStore = defineStore('games', () => {
         })
     }
 
-    const play = (game, idx) => {
+    const startGame = (gameArg) => {
+        // After adding game to the DB emit a message to the server to start the game
+        socket.emit('startGame', gameArg, (startedGame) => {
+            console.log('Game has started', startedGame)
+        })
+    }
+
+    const flipCard = (gameArg, idx) => {
         storeError.resetMessages()
-        socket.emit('play', {
+        socket.emit('flipCard', {
             index: idx,
-            gameId: game.id
+            gameId: gameArg.id
         }, (response) => {
             if (webSocketServerResponseHasError(response)) {
                 return
@@ -72,52 +82,52 @@ export const useGamesStore = defineStore('games', () => {
         })
     }
 
-    const quit = (game) => {
+    const quit = (gameArg) => {
         storeError.resetMessages()
-        socket.emit('quitGame', game.id, (response) => {
+        socket.emit('quitGame', gameArg.id, (response) => {
             if (webSocketServerResponseHasError(response)) {
                 return
             }
-            removeGameFromList(game)
+            removeGameFromList(gameArg)
         })
     }
     
-    const close = (game) => {
+    const close = (gameArg) => {
         storeError.resetMessages()
-        socket.emit('closeGame', game.id, (response) => {
+        socket.emit('closeGame', gameArg.id, (response) => {
             if (webSocketServerResponseHasError(response)) {
                 return
             }
-            removeGameFromList(game)
+            removeGameFromList(gameArg)
         })
     }
 
-    socket.on('gameStarted', async (game) => {
-        if (game.player1_id === storeAuth.userId) {
+    socket.on('gameStarted', async (gameArg) => {
+        if (gameArg.owner.user.id === storeAuth.userId) {
             toast({
                 title: 'Game Started',
-                description: `Game #${game.id} has started!`,
+                description: `Game #${gameArg.id} has started!`,
             })
         }
+        game.value = gameArg
         fetchPlayingGames()
     })
 
-    socket.on('gameEnded', async (game) => {
-        updateGame(game)
+    socket.on('gameEnded', async (gameArg) => {
+        updateGame(gameArg)
         // Player that created the game is responsible for updating on the database
-        if (playerNumberOfCurrentUser(game) === 1) {
-            const APIresponse = await axios.patch('games/' + game.id, {
+        if (playerNumberOfCurrentUser(gameArg) === 1) {
+            const APIresponse = await axios.patch('games/' + gameArg.id, {
                 status: 'ended',
-                winner_id: game.gameStatus === 1 ? game.player1_id :
-                    (game.gameStatus === 2 ? game.player2_id : null),
+                winner_id: gameArg.winner,
             })
             const updatedGameOnDB = APIresponse.data.data
             console.log('Game has ended and updated on the database: ', updatedGameOnDB)
         }
     })
 
-    socket.on('gameChanged', (game) => {
-        updateGame(game)
+    socket.on('gameChanged', (gameArg) => {
+        updateGame(gameArg)
     })
 
     socket.on('gameQuitted', async (payload) => {
@@ -131,25 +141,18 @@ export const useGamesStore = defineStore('games', () => {
         updateGame(payload.game)
     })
     
-    socket.on('gameInterrupted', async (game) => {
-        updateGame(game)
+    socket.on('gameInterrupted', async (gameArg) => {
+        gameArg.interrupted = true
+        updateGame(gameArg)
         toast({
             title: 'Game Interruption',
             description:
-                `Game #${game.id} was interrupted because your opponent has gone offline!`,
+                `Game #${gameArg.id} was interrupted because your opponent has gone offline!`,
             variant: 'destructive'
         })
-        const APIresponse = await axios.patch('games/' + game.id, {
-            status: 'interrupted',
-            winner_id: game.gameStatus === 1 ? game.player1_id :
-                (game.gameStatus === 2 ? game.player2_id : null),
-        })
-        const updatedGameOnDB = APIresponse.data.data
-        console.log('Game was interrupted and updated on the database: ',
-            updatedGameOnDB)
     })
 
     return {
-        games, totalGames, playerNumberOfCurrentUser, fetchPlayingGames, play, quit, close
+        games, game, totalGames, playerNumberOfCurrentUser, fetchPlayingGames, startGame, flipCard, quit, close
     }
 })

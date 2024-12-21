@@ -91,11 +91,10 @@ export const useGameStore = defineStore('game', () => {
             console.log(response.data.data)
             return response.data.data
         } catch (e) {
-            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating project!')
+            storeError.setErrorMessages(e.response.data.message, e.response.data.errors, e.response.status, 'Error updating game!')
             return false
         }
     }
-
 
 
 

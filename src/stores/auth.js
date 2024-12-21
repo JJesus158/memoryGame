@@ -27,11 +27,15 @@ export const useAuthStore = defineStore('auth', () => {
         return user.value ? user.value.name : ''
     })
 
-    const userFirstLastName = computed(() => {
-        const names = userName.value.trim().split(' ')
+    const getFirstLastName = (fullName) => {
+        const names = fullName.trim().split(' ')
         const firstName = names[0] ?? ''
         const lastName = names.length > 1 ? names[names.length -1 ] : ''
         return (firstName + ' ' + lastName).trim()
+    }
+
+    const userFirstLastName = computed(() => {
+        return getFirstLastName(userName.value)
     })
 
     const userEmail = computed(() => {
@@ -213,6 +217,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         user, userId,userName, userEmail, userType, userPhoto,
-        login, logout, restoreToken, userBalance, userNickName, userBlocked, deleteAccount, userPassword, updateProfile, registerProfile, refreshUserInfo
+        login, logout, restoreToken, userBalance, userNickName, userBlocked, deleteAccount, userPassword, updateProfile, registerProfile, refreshUserInfo, getFirstLastName
     }
 })

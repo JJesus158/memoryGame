@@ -26,7 +26,7 @@ const handleClick = () => {
         :src="props.flipped ? props.icon : semFaceImage"
         v-show="!props.matched"
         alt="Card"
-        class="absolute w-full h-full rounded-lg"
+        class="absolute w-full h-full"
     />
 
   </div>

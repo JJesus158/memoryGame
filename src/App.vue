@@ -2,23 +2,47 @@
 import { useAuthStore } from '@/stores/auth'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import GlobalAlertDialog from "@/common/GlobalAlertDialog.vue";
-import { useTemplateRef, provide, ref, computed } from "vue";
+import GlobalInputDialog from '@/common/GlobalInputDialog.vue'
+import { useTemplateRef, provide, ref, computed, inject } from "vue";
 import { useRoute } from "vue-router";
+import { useChatStore } from './stores/chat';
 
 const alertDialog = useTemplateRef('alert-dialog')
 provide('alertDialog', alertDialog)
 
+const inputDialog = useTemplateRef('input-dialog')
+provide('inputDialog', inputDialog)
+
 const storeAuth = useAuthStore()
+const storeChat = useChatStore()
+const socket = inject('socket')
 
 const route = useRoute();
 const isProfilePage = computed(() => route.name === ('me' && 'login'));
 
+let userDestination = null
+socket.on('privateMessage', (messageObj) => {
+    userDestination = messageObj.user
+    inputDialog.value.open(
+        handleMessageFromInputDialog,
+        'Message from ' + messageObj.user.name,
+        `This is a private message sent by ${messageObj?.user?.name}!`,
+        'Reply Message', '',
+        'Close', 'Reply',
+        messageObj.message
+    )
+})
+
+const handleMessageFromInputDialog = (message) => {
+    storeChat.sendPrivateMessageToUser(userDestination, message)
+}
 </script>
 
 
 <template>
   <Toaster></Toaster>
   <GlobalAlertDialog ref="alert-dialog"></GlobalAlertDialog>
+  <GlobalInputDialog ref="input-dialog"></GlobalInputDialog>
   <div class="flex flex-row justify-between items-center m-4 min-h-14">
     <div class="flex space-x-4">
       <RouterLink :to="{ name: 'home'}" >Memory Game</RouterLink>

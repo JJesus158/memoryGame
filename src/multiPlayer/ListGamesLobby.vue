@@ -1,9 +1,18 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useLobbyStore } from '@/stores/lobby';
+import { useBoardStore } from '@/stores/board';
+import router from '@/router'
 
 const storeAuth = useAuthStore()
 const storeLobby = useLobbyStore()
+const storeBoard = useBoardStore()
+
+const joinGame = (gameId) => {
+    storeLobby.joinGame(gameId, async () => {
+        await router.push({ name: "multigame" })
+    })
+}
 </script>
 
 <template>
@@ -11,11 +20,11 @@ const storeLobby = useLobbyStore()
         <div v-for="game in storeLobby.games" :key="game.id" class="flex ps-2 pe-1">
             <div class="flex flex-col grow">
                 <div class="text-base pe-4 grow leading-10 flex space-x-2">
-                    <span class="pl-1">{{ storeAuth.getFirstLastName(game.player1.name) }}</span>
+                    <span class="pl-1">{{ storeAuth.getFirstLastName(game.owner.user.name) }}</span>
                 </div>
                 <span class="text-xs ps-1 pb-2 -mt-1 text-gray-500">
                     {{ new Date(game.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second:
-                    "2-digit" }) }}</span>
+                    "2-digit" }) }} - Board {{ storeBoard.getById(game.boardId).label }} ({{ game.numberOfPlayers }} Players)</span>
             </div>
             <div class="py-1 flex items-center min-w-[1.9rem]">
                 <button v-show="storeLobby.canRemoveGame(game)" type="button"
@@ -28,7 +37,7 @@ const storeLobby = useLobbyStore()
                     </svg>
                 </button>
                 <button v-show="storeLobby.canJoinGame(game)" type="button"
-                    class="rounded bg-cyan-500 p-2 m-0.5 text-white" @click="storeLobby.joinGame(game.id)">
+                    class="rounded bg-cyan-500 p-2 m-0.5 text-white" @click="joinGame(game.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
                         stroke="currentColor" class="size-4">
                         <path stroke-linecap="round" stroke-linejoin="round"

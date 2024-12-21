@@ -44,6 +44,12 @@ export const useBoardStore = defineStore('board', () => {
     };
 
 
+    const getById = (id) => {
+        if (!listOfBoards.value) return null
+        return listOfBoards.value.find(item => item.id === id)
+    };    
 
-   return{listOfBoards, loadBoards, fetchBoard, board};
+
+
+   return{listOfBoards, loadBoards, fetchBoard, board, getById};
 });

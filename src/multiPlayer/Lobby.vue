@@ -7,11 +7,13 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import ListGamesLobby from './ListGamesLobby.vue'
 import { useLobbyStore } from '@/stores/lobby'
 
 const storeLobby = useLobbyStore()
+
+const props = defineProps(["showCreateGame"])
 
 onMounted(() => {
     storeLobby.fetchGames()
@@ -26,7 +28,7 @@ onMounted(() => {
         </CardHeader>
         <CardContent class="p-4">
             <div class="py-2">
-                <Button @click="storeLobby.addGame">
+                <Button @click="props.showCreateGame">
                     New Game
                 </Button>
             </div>

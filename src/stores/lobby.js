@@ -11,6 +11,7 @@ export const useLobbyStore = defineStore('lobby', () => {
     const socket = inject("socket")
 
     const games = ref([])
+    const game = ref(null)
 
     const totalGames = computed(() => games.value.length)
 
@@ -25,6 +26,15 @@ export const useLobbyStore = defineStore('lobby', () => {
     // when the lobby changes on the server, it is updated on the client
     socket.on('lobbyChanged', (lobbyGames) => {
         games.value = lobbyGames
+
+        if (game.value != null) {
+            for (let i = 0; i < lobbyGames.length; i++) {
+                if (lobbyGames[i].id == game.value.id) {
+                    game.value = lobbyGames[i]
+                    break
+                }
+            }
+        }
     })
 
     // fetch lobby games from the Websocket server
@@ -34,17 +44,33 @@ export const useLobbyStore = defineStore('lobby', () => {
             if (webSocketServerResponseHasError(response)) {
                 return
             }
+            
             games.value = response
+
+            if (game.value != null) {
+                for (let i = 0; i < response.length; i++) {
+                    if (response[i].id == game.value.id) {
+                        game.value = response[i]
+                        break
+                    }
+                }
+            }
         })
     }
 
     // add a game to the lobby
-    const addGame = () => {
+    const addGame = (gameInfo, onAdded) => {
         storeError.resetMessages()
-        socket.emit('addGame', (response) => {
+        socket.emit('addGame', {
+            boardId: gameInfo.boardId,
+            numberOfCards: gameInfo.numberOfCards,
+            numberOfPlayers: gameInfo.numberOfPlayers
+        }, (response) => {
             if (webSocketServerResponseHasError(response)) {
                 return
             }
+            game.value = response
+            onAdded()
         })
     }
 
@@ -60,37 +86,28 @@ export const useLobbyStore = defineStore('lobby', () => {
 
     // Whether the current user can remove a specific game from the lobby
     const canRemoveGame = (game) => {
-        return game.player1.id === storeAuth.userId
+        return game.owner.user.id === storeAuth.userId
     }
 
     // join a game of the lobby
-    const joinGame = (id) => {
+    const joinGame = (id, onJoined) => {
         storeError.resetMessages()
         socket.emit('joinGame', id, async (response) => {
             // callback executed after the join is complete
             if (webSocketServerResponseHasError(response)) {
                 return
             }
-            const APIresponse = await axios.post('games', {
-                player1_id: response.player1.id,
-                player2_id: response.player2.id,
-            })
-            const newGameOnDB = APIresponse.data.data
-            newGameOnDB.player1SocketId = response.player1SocketId
-            newGameOnDB.player2SocketId = response.player2SocketId
-            // After adding game to the DB emit a message to the server to start the game
-            socket.emit('startGame', newGameOnDB, (startedGame) => {
-                console.log('Game has started', startedGame)
-            })
+            game.value = response
+            onJoined()
         })
     }
 
     // Whether the current user can join a specific game from the lobby
     const canJoinGame = (game) => {
-        return storeAuth.user && game.player1.id !== storeAuth.userId
+        return storeAuth.user && !game.players.some(player => player.user.id == storeAuth.userId)
     }
 
     return {
-        games, totalGames, fetchGames, addGame, joinGame, canJoinGame, removeGame, canRemoveGame
+        games, game, totalGames, fetchGames, addGame, joinGame, canJoinGame, removeGame, canRemoveGame
     }
 })

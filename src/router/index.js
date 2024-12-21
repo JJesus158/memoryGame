@@ -1,20 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import NewGame from "@/game/CreateGame.vue";
-import Game from "@/game/Game.vue";
-import Games from "@/history/Games.vue";
+import NewGame from "@/components/singlePlayer/CreateGame.vue";
+import Game from "@/components/singlePlayer/Game.vue";
+import Games from "@/components/history/Games.vue";
 import Login from "@/Login.vue";
 import {useAuthStore} from "@/stores/auth.js";
-import Transaction from "@/transactions/Transaction.vue";
-import UserProfile from "@/user/UserProfile.vue";
-import ProfileUpdateForm from "@/user/ProfileUpdateForm.vue";
-import Register from "@/user/Register.vue";
-import AnonymousGame from "@/game/AnonymousGame.vue";
+import Transaction from "@/components/transactions/Transaction.vue";
+import UserProfile from "@/components/user/UserProfile.vue";
+import ProfileUpdateForm from "@/components/user/ProfileUpdateForm.vue";
+import Register from "@/components/user/Register.vue";
+import AnonymousGame from "@/components/singlePlayer/AnonymousGame.vue";
 import ErrorPage from "@/components/ErrorPage.vue";
-import {Home} from "lucide-vue-next";
 import Dashboard from "@/Dashboard.vue";
-import UsersList from "@/history/UsersList.vue";
-import RegisterAdmin from "@/user/RegisterAdmin.vue";
-import MultiPlayerGames from '@/game/MultiPlayerGames.vue';
+import UsersList from "@/components/history/UsersList.vue";
+import RegisterAdmin from "@/components/user/RegisterAdmin.vue";
+import MultiPlayerGames from '@/components/multiPlayer/MultiPlayerGames.vue';
+import MultiGame from '@/components/multiPlayer/MultiGame.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -76,6 +76,11 @@ const router = createRouter({
       component: MultiPlayerGames
     },
     {
+      path: '/multigame',
+      name: 'multigame',
+      component: MultiGame
+    },
+    {
       path: '/error/:errorCode',
       name: 'ErrorPage',
       component: ErrorPage
@@ -125,6 +130,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (((to.name === 'multi') && (!storeAuth.user))) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (((to.name === 'multigame') && (!storeAuth.user))) {
     next({ name: 'login' })
     return
   }
