@@ -112,7 +112,7 @@ const startGame = async () => {
       winner_user_id: null,
       type: 'M',
       status: 'PL',
-      began_at: null,
+      began_at: (new Date()).toISOString(),
       ended_at: null,
       total_time: null,
       board_id: board.value.id,
@@ -142,11 +142,11 @@ const updateTimer = () => {
   }
 }
 
-const quitGame = async () => {
+const finishGame = async () => {
   if (game.value.owner.user.id == storeAuth.userId) {
     dbGame.winner_user_id = game.value.winner ? game.value.players[game.value.winner - 1].user.id : null;
     dbGame.status = 'E';
-    dbGame.ended_at = endAtTime;
+    dbGame.ended_at = (new Date()).toISOString();
     dbGame.total_time = game.value.winner ? game.value.playerTimers[game.value.winner - 1] : game.value.playerTimers[0];
     dbGame.total_turns_winner = game.value.winner ? game.value.playerTotalTurns[game.value.winner - 1] : game.value.playerTotalTurns[0];
     dbGame.custom = { cards: cards.value };
@@ -154,7 +154,10 @@ const quitGame = async () => {
     await storeGame.updateGame(dbGame); // Persist the game state
   }
 
-  storeGames.quit(game.value)
+  //storeGames.quit(game.value)
+}
+
+const quitGame = async () => {
   await router.push('/multi')
 }
 
@@ -202,7 +205,7 @@ watch(
       }
 
       if (newGame.gameStatus > 0) {
-        endAtTime = new Date().toLocaleString()
+        finishGame()
       }
 
       const newCards = []

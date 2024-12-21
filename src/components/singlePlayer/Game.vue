@@ -47,7 +47,7 @@ const setupGame = async () => {
 
 const startTimer = () => {
   if (!timerStarted.value) {
-    game.value.began_at = new Date().toLocaleString();
+    game.value.began_at = (new Date()).toISOString();
   }
   timerStarted.value = true;
   timerInterval.value = setInterval(() => {
@@ -98,7 +98,7 @@ const finishGame = async () => {
   game.value.total_time = timer.value;
   game.value.total_turns_winner = total_turns.value;
   game.value.custom.cards = cards.value;
-  game.value.ended_at = new Date().toLocaleString();
+  game.value.ended_at = (new Date()).toISOString();
 
   await gameStore.updateGame(game.value); // Persist the game state
 };
