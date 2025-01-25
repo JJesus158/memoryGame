@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import {useToast} from "vue-toastification";
-
+import { useToast } from '@/components/ui/toast/use-toast'
 
 export const useErrorStore = defineStore('error', () => {
     const { toast } = useToast()
@@ -21,7 +20,7 @@ export const useErrorStore = defineStore('error', () => {
 
     const title = computed(() => {
         return _title.value.trim()
-    })
+    })    
 
     const fieldMessage = (fieldName) => {
         const errorsOfField = _fieldErrorMessages.value ? _fieldErrorMessages.value[fieldName] : ''
@@ -34,7 +33,7 @@ export const useErrorStore = defineStore('error', () => {
         _statusCode.value = 0
         _title.value = ''
     }
-
+    
     const setErrorMessages = (mainMessage, fieldMessages, status = 0, titleMessage = '') => {
         _message.value = mainMessage
         _fieldErrorMessages.value = fieldMessages;
@@ -59,10 +58,10 @@ export const useErrorStore = defineStore('error', () => {
                 toastMessage = `An error occurred! Message from the server: "${mainMessage}"`
         }
         toast({
-            title: titleMessage,
-            description: toastMessage,
-            variant: 'destructive'
-        })
+                title: titleMessage,
+                description: toastMessage,
+                variant: 'destructive'
+            })
     }
     return {
         message, statusCode, title,
