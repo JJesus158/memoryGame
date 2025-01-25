@@ -3,8 +3,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useErrorStore } from '@/stores/error'
 import { useRouter } from 'vue-router'
-import avatarNoneAssetURL from '@/assets/miscellaneous_small/20.png'
-import {toast} from "@/components/ui/toast/index.js";
+
 import * as response from "autoprefixer";
 
 export const useAuthStore = defineStore('auth', () => {

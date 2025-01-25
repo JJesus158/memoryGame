@@ -1,11 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import Router from "@/router/index.js";
 import {useErrorStore} from "@/stores/error.js";
-import {toast} from "@/components/ui/toast/index.js";
-import {ToastAction} from "radix-vue";
-import router from "@/router/index.js";
 
 
 export const useUserStore = defineStore('user', () => {
